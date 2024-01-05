@@ -126,6 +126,7 @@ struct mpweapon g_MpWeapons[NUM_MPWEAPONS] = {
 	.crouchmode = CROUCHMODE_TOGGLE_ANALOG, \
 	.extcontrols = true, \
 	.crosshaircolour = 0x00ff0028, \
+	.crosshairsize = 2, \
 }
 
 struct extplayerconfig g_PlayerExtCfg[MAX_LOCAL_PLAYERS] = { 
