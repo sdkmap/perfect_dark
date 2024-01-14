@@ -5,7 +5,9 @@
 #include "constants.h"
 #include "net/netbuf.h"
 
-#define NET_PROTOCOL_VER 9
+#define NET_PROTOCOL_VER 10
+
+#define NET_QUERY_MAGIC "PDQM\x01"
 
 #define NET_MAX_CLIENTS MAX_PLAYERS
 #define NET_MAX_NAME MAX_PLAYERNAME
@@ -105,6 +107,9 @@ struct netclient {
 
 extern s32 g_NetMode;
 
+extern s32 g_NetJoinLatch;
+extern s32 g_NetHostLatch;
+
 // net frame, ticks at 60 fps, starts at 0 when the server is started
 extern u32 g_NetTick;
 extern u32 g_NetNextSyncId;
@@ -144,6 +149,8 @@ void netChatPrintf(struct netclient *dst, const char *fmt, ...);
 void netServerStageStart(void);
 void netServerStageEnd(void);
 void netServerKick(struct netclient *cl, const u32 reason);
+
+struct netclient *netClientForPlayerNum(s32 playernum);
 
 void netClientSyncRng(void);
 void netClientSettingsChanged(void);

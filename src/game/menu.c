@@ -5379,7 +5379,7 @@ Gfx *menuRender(Gfx *gdl)
 #ifndef PLATFORM_N64
 			if (g_NetMode) {
 				if (g_NetMode == NETMODE_SERVER) {
-					sprintf(text, "Server: %d/%d", g_NetNumClients, g_NetMaxClients);
+					sprintf(text, "Server: %d/%d %04x", g_NetNumClients, g_NetMaxClients, g_MpSetup.chrslots);
 				} else {
 					sprintf(text, "Client: ID %u", g_NetLocalClient->id);
 				}

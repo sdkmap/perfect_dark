@@ -17,19 +17,29 @@
 #include "game/bondgun.h"
 #include "game/game_1531a0.h"
 #include "game/game_0b0fd0.h"
+#include "game/title.h"
+#include "game/menu.h"
+#include "game/pdmode.h"
+#include "game/mplayer/mplayer.h"
 #include "lib/main.h"
 #include "lib/vi.h"
 #include "config.h"
 #include "system.h"
 #include "console.h"
+#include "fs.h"
+#include "romdata.h"
 #include "utils.h"
 
 s32 g_NetMode = NETMODE_NONE;
+
+s32 g_NetHostLatch = false;
+s32 g_NetJoinLatch = false;
 
 u32 g_NetServerUpdateRate = 1;
 u32 g_NetServerInRate = 128 * 1024;
 u32 g_NetServerOutRate = 128 * 1024;
 u32 g_NetServerPort = NET_DEFAULT_PORT;
+s32 g_NetServerInfoQuery = true;
 
 u32 g_NetClientUpdateRate = 1;
 u32 g_NetClientInRate = 128 * 1024;
@@ -80,27 +90,20 @@ static s32 netParseAddr(ENetAddress *out, const char *str)
 
 	char *host = tmp;
 	char *port = NULL;
+	char *colon = strrchr(tmp, ':');
 
-	if (tmp[0] == '[') {
-		// ipv6 with port: [ADDR]:PORT
-		host = tmp + 1; // skip [
-		port = strrchr(host, ']'); // find ]
-		if (port) {
-			if (port[1] != ':' || !isdigit(port[2])) {
-				return false;
-			}
-			*port = '\0'; // terminate ip
-			port += 2; // skip ]:
-		}
-	} else {
-		// ipv4 or hostname
-		port = strrchr(host, ':');
-		if (port) {
-			if (!isdigit(port[1])) {
-				return false;
-			}
-			*port = '\0'; // terminate address
-			++port; // skip :
+	// if there is a : in the address string, there could be a port value
+	// otherwise it's an ip or hostname with default port
+	if (colon > tmp) {
+		if (tmp[0] == '[' && colon[-1] == ']' && isdigit(colon[1])) {
+			// ipv6 with port: [ADDR]:PORT
+			colon[-1] = '\0'; // terminate ip
+			host = tmp + 1; // skip [
+			port = colon + 1; // skip :
+		} else if (isdigit(colon[1]) && strchr(host, ':') == colon) {
+			// ipv4 or hostname with port
+			colon[0] = '\0'; // terminate ip
+			port = colon + 1; // skip :
 		}
 	}
 
@@ -330,11 +333,107 @@ static inline const char *netGetDisconnectReason(const u32 reason)
 	return msgs[0];
 }
 
+static void netServerQueryResponse(ENetAddress *address)
+{
+	static u8 data[256];
+	static ENetBuffer ebuf;
+	struct netbuf buf = { .data = data, .size = sizeof(data) };
+	const u8 flags = (g_NetLocalClient && g_NetLocalClient->state > CLSTATE_LOBBY)
+		| (0 << 1); // TODO: this will indicate coop/anti/etc
+	const char *modDir = fsGetModDir();
+	if (!modDir) {
+		modDir = "";
+	}
+
+	netbufStartWrite(&buf);
+	netbufWriteData(&buf, NET_QUERY_MAGIC, sizeof(NET_QUERY_MAGIC) - 1);
+	netbufWriteU16(&buf, 0); // space for size
+	netbufWriteU32(&buf, NET_PROTOCOL_VER);
+	netbufWriteU8(&buf, flags);
+	netbufWriteU8(&buf, g_NetNumClients);
+	netbufWriteU8(&buf, g_NetMaxClients);
+	netbufWriteU8(&buf, g_StageNum);
+	netbufWriteU8(&buf, g_MpSetup.scenario);
+	netbufWriteStr(&buf, g_NetLocalClient ? g_NetLocalClient->settings.name : "");
+	netbufWriteStr(&buf, g_RomName);
+	netbufWriteStr(&buf, modDir);
+	netbufWriteU16(&buf, 0); // space for checksum
+
+	ebuf.data = buf.data;
+	ebuf.dataLength = buf.wp;
+
+	// rewrite size
+	buf.wp = sizeof(NET_QUERY_MAGIC) - 1;
+	netbufWriteU16(&buf, ebuf.dataLength);
+
+	// calculate and rewrite checksum
+	buf.wp = ebuf.dataLength - sizeof(u16);
+	u16 crc = 0xFFFF;
+	u16 x;
+	for (u32 i = 0; i < buf.wp; ++i) {
+		x = crc >> 8 ^ buf.data[i];
+		x ^= x >> 4;
+		crc += (crc << 8) ^ (x << 12) ^ (x << 5) ^ x;
+	}
+	netbufWriteU16(&buf, crc);
+
+	enet_socket_send(g_NetHost->socket, address, &ebuf, 1);
+}
+
+static s32 netServerConnectionlessPacket(ENetEvent *event, ENetAddress *address, u8 *rxdata, s32 rxlen)
+{
+	if (rxdata && rxlen >= 5) {
+		if (!memcmp(rxdata, NET_QUERY_MAGIC, sizeof(NET_QUERY_MAGIC) - 1)) {
+			// this is a query packet, respond with server status
+			sysLogPrintf(LOG_NOTE | LOGFLAG_NOCON, "NET: query request from %s, responding", netFormatAddr(address));
+			netServerQueryResponse(address);
+			return 1;
+		}
+	}
+	// probably a normal packet, pass through to enet
+	return 0;
+}
+
+struct netclient *netClientForPlayerNum(s32 playernum)
+{
+	s32 slot = 0;
+	for (s32 i = 0; i < g_NetMaxClients; ++i) {
+		struct netclient *cl = &g_NetClients[i];
+		if (cl->state >= CLSTATE_LOBBY) {
+			if (slot == playernum) {
+				return cl;
+			}
+			++slot;
+		}
+	}
+	return NULL;
+}
+
 void netInit(void)
 {
 	if (enet_initialize() < 0) {
 		sysLogPrintf(LOG_ERROR, "NET: could not init ENet, disabling networking");
 		return;
+	}
+
+	const s32 argmaxclients = sysArgGetInt("--maxclients", -1);
+	if (argmaxclients > 0 && argmaxclients <= NET_MAX_CLIENTS) {
+		g_NetMaxClients = argmaxclients;
+	}
+
+	const s32 argport = sysArgGetInt("--port", -1);
+	if (argport > 0 && argport < 0x10000) {
+		g_NetServerPort = argport;
+	}
+
+	const char *argjoin = sysArgGetString("--connect");
+	if (argjoin) {
+		strncpy(g_NetLastJoinAddr, argjoin, sizeof(g_NetLastJoinAddr) - 1);
+		g_NetJoinLatch = true;
+	}
+
+	if (sysArgCheck("--host")) {
+		g_NetHostLatch = true;
 	}
 
 	g_NetInit = true;
@@ -352,6 +451,10 @@ s32 netStartServer(u16 port, s32 maxclients)
 	if (!g_NetHost) {
 		sysLogPrintf(LOG_ERROR, "NET: could not create ENet host");
 		return -2;
+	}
+
+	if (g_NetServerInfoQuery) {
+		enet_host_set_intercept_callback(g_NetHost, netServerConnectionlessPacket);
 	}
 
 	netClientResetAll();
@@ -439,6 +542,8 @@ s32 netStartClient(const char *addr)
 		return -3;
 	}
 
+	enet_host_set_intercept_callback(g_NetHost, NULL);
+
 	// save the address since it appears to be valid
 	strncpy(g_NetLastJoinAddr, addr, NET_MAX_ADDR);
 
@@ -479,6 +584,9 @@ s32 netDisconnect(void)
 		return -1;
 	}
 
+	// stop responding to connectionless packets
+	enet_host_set_intercept_callback(g_NetHost, NULL);
+
 	const bool wasingame = (g_NetLocalClient->state >= CLSTATE_GAME);
 
 	for (s32 i = 0; i < NET_MAX_CLIENTS + 1; ++i) {
@@ -504,8 +612,24 @@ s32 netDisconnect(void)
 	sysLogPrintf(LOG_CHAT, "NET: disconnected");
 
 	if (wasingame) {
+		// skip the "want to save" dialog for all players
+		for (s32 i = 0; i < MAX_PLAYERS; ++i) {
+			if (g_Vars.players[i]) {
+				g_PlayerConfigsArray[i].options |= OPTION_ASKEDSAVEPLAYER;
+			}
+		}
+		// end the stage immediately
 		mainEndStage();
+		// try to drop back to main menu with 1 player
+		mpSetPaused(MPPAUSEMODE_UNPAUSED);
 		g_MpSetup.chrslots = 1;
+		g_Vars.mplayerisrunning = false;
+		g_Vars.normmplayerisrunning = false;
+		g_Vars.lvmpbotlevel = 0;
+		titleSetNextStage(STAGE_CITRAINING);
+		setNumPlayers(1);
+		titleSetNextMode(TITLEMODE_SKIP);
+		mainChangeToStage(STAGE_CITRAINING);
 	}
 
 	return 0;
@@ -709,7 +833,7 @@ void netStartFrame(void)
 					if (cl) {
 						netServerEvDisconnect(cl);
 					} else {
-						sysLogPrintf(LOG_WARNING, "NET: disconnect from %s without attached client", netFormatPeerAddr(ev.peer));
+						sysLogPrintf(LOG_WARNING | LOGFLAG_NOCON, "NET: disconnect from %s without attached client", netFormatPeerAddr(ev.peer));
 						--g_NetNumClients;
 					}
 				}
@@ -728,7 +852,7 @@ void netStartFrame(void)
 							netbufReset(&cl->in);
 						}
 					} else if (!isClient) {
-						sysLogPrintf(LOG_WARNING, "NET: receive from %s without attached client", netFormatPeerAddr(ev.peer));
+						sysLogPrintf(LOG_WARNING | LOGFLAG_NOCON, "NET: receive from %s without attached client", netFormatPeerAddr(ev.peer));
 					}
 				}
 				enet_packet_dispose(ev.packet);
@@ -827,18 +951,28 @@ u32 netSend(struct netclient *dstcl, struct netbuf *buf, const s32 reliable, con
 
 void netPlayersAllocate(void)
 {
+	s32 playernum = 0;
+
+	if (g_NetMode == NETMODE_CLIENT) {
+		// we always put the local player at index 0, even client-side
+		// which means that clientside we have to put the server's player into our slot
+		const s32 svplayernum = g_NetLocalClient->playernum;
+		g_NetLocalClient->playernum = 0;
+		g_NetClients[0].playernum = svplayernum;
+	}
+
 	for (s32 i = 0; i < g_NetMaxClients; ++i) {
 		struct netclient *cl = &g_NetClients[i];
 		if (cl->state < CLSTATE_LOBBY) {
 			continue;
 		}
 
-		if (cl == g_NetLocalClient) {
-			// we always put the local player at index 0, even client-side
-			cl->playernum = 0;
-		} else {
-			// which means that clientside we have to put the server's player into our slot
-			cl->playernum = (g_NetMode == NETMODE_CLIENT && i == 0) ? g_NetLocalClient->id : cl->id;
+		if (g_NetMode == NETMODE_SERVER) {
+			// on the server allocate players sequentially
+			cl->playernum = playernum++;
+		}
+
+		if (cl != g_NetLocalClient) {
 			// disable controls for the remote pawns and set their settings
 			// TODO: backup the player configs or something
 			struct mpplayerconfig *cfg = &g_PlayerConfigsArray[cl->playernum];
@@ -850,16 +984,18 @@ void netPlayersAllocate(void)
 			cfg->options = g_PlayerConfigsArray[0].options & OPTION_PAINTBALL;
 			cfg->options |= cl->settings.options & ~OPTION_PAINTBALL;
 			// don't enable toggle aim, invert pitch or lookahead for remote players
-			cfg->options &= ~(OPTION_AIMCONTROL | OPTION_LOOKAHEAD | OPTION_ASKEDSAVEPLAYER);
-			cfg->options |= OPTION_FORWARDPITCH;
+			cfg->options &= ~(OPTION_AIMCONTROL | OPTION_LOOKAHEAD);
+			cfg->options |= OPTION_FORWARDPITCH | OPTION_ASKEDSAVEPLAYER;
 		}
 
-		cl->player = g_Vars.players[cl->playernum];
 		cl->config = &g_PlayerConfigsArray[cl->playernum];
 		cl->config->client = cl;
 		cl->config->handicap = 0x80;
-		cl->player->client = cl;
-		cl->player->isremote = (cl != g_NetLocalClient);
+		cl->player = g_Vars.players[cl->playernum];
+		if (cl->player) {
+			cl->player->client = cl;
+			cl->player->isremote = (cl != g_NetLocalClient);
+		}
 	}
 }
 
@@ -896,9 +1032,14 @@ void netSyncIdsAllocate(void)
 	// HACK: when we're a client, we'll need to swap our player and server player's props
 	// because of what we do in netPlayersAllocate
 	if (g_NetMode == NETMODE_CLIENT) {
-		const u16 sid = g_Vars.players[g_NetLocalClient->id]->prop->syncid;
-		g_Vars.players[g_NetLocalClient->id]->prop->syncid = g_Vars.players[0]->prop->syncid;
-		g_Vars.players[0]->prop->syncid = sid;
+		if (!g_NetLocalClient->player || !g_NetLocalClient->player->prop) {
+			sysLogPrintf(LOG_ERROR, "NET: no props allocated for players?");
+			netDisconnect();
+			return;
+		}
+		const u16 sid = g_NetClients[0].player->prop->syncid;
+		g_NetClients[0].player->prop->syncid = g_NetLocalClient->player->prop->syncid;
+		g_NetLocalClient->player->prop->syncid = sid;
 	}
 
 	sysLogPrintf(LOG_NOTE, "NET: last initial syncid: %u", g_NetNextSyncId);
@@ -981,4 +1122,5 @@ PD_CONSTRUCTOR static void netConfigInit(void)
 	configRegisterUInt("Net.Server.InRate", &g_NetServerInRate, 0, 10 * 1024 * 1024);
 	configRegisterUInt("Net.Server.OutRate", &g_NetServerOutRate, 0, 10 * 1024 * 1024);
 	configRegisterUInt("Net.Server.UpdateFrames", &g_NetServerUpdateRate, 0, 60);
+	configRegisterInt("Net.Server.AllowInfoQuery", &g_NetServerInfoQuery, 0, 1);
 }

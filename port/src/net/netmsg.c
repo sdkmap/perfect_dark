@@ -424,8 +424,9 @@ u32 netmsgSvcStageStartWrite(struct netbuf *dst)
 	for (s32 i = 0; i < g_NetMaxClients; ++i) {
 		struct netclient *ncl = &g_NetClients[i];
 		if (ncl->state) {
-			ncl->settings.team = g_PlayerConfigsArray[ncl->id].base.team;
+			ncl->settings.team = ncl->config->base.team;
 			netbufWriteU8(dst, ncl->id);
+			netbufWriteU8(dst, ncl->playernum);
 			netbufWriteU8(dst, ncl->settings.team);
 			netbufWriteU16(dst, ncl->settings.options);
 			netbufWriteU8(dst, ncl->settings.bodynum);
@@ -490,6 +491,7 @@ u32 netmsgSvcStageStartRead(struct netbuf *src, struct netclient *srccl)
 	for (u8 i = 0; i < numplayers; ++i) {
 		const u8 id = netbufReadU8(src);
 		struct netclient *ncl = &g_NetClients[id];
+		ncl->playernum = netbufReadU8(src);
 		ncl->settings.team = netbufReadU8(src);
 		if (ncl != g_NetLocalClient) {
 			ncl->id = id;
@@ -506,7 +508,7 @@ u32 netmsgSvcStageStartRead(struct netbuf *src, struct netclient *srccl)
 				return 3;
 			}
 		} else {
-			// skip our own settings except for the team
+			// skip our own settings except for the team and player number
 			netbufReadU16(src);
 			netbufReadU8(src);
 			netbufReadU8(src);
@@ -523,16 +525,17 @@ u32 netmsgSvcStageStartRead(struct netbuf *src, struct netclient *srccl)
 	}
 
 	// set teams on the player configs, but swap teams with the server player
+	// because we haven't swapped player numbers yet (see netPlayersAlloc)
 	for (u32 i = 0; i < NET_MAX_CLIENTS; ++i) {
 		struct netclient *ncl = &g_NetClients[i];
 		if (ncl->state) {
 			u32 playernum = 0;
 			if (ncl->id == 0) {
-				playernum = g_NetLocalClient->id;
+				playernum = g_NetLocalClient->playernum;
 			} else if (ncl == g_NetLocalClient) {
-				playernum = 0;
+				playernum = g_NetClients[0].playernum;
 			} else {
-				playernum = ncl->id;
+				playernum = ncl->playernum;
 			}
 			g_PlayerConfigsArray[playernum].base.team = ncl->settings.team;
 		}
@@ -577,11 +580,13 @@ u32 netmsgSvcStageEndRead(struct netbuf *src, struct netclient *srccl)
 	for (s32 i = 0; i < g_NetMaxClients; ++i) {
 		struct netclient *ncl = &g_NetClients[i];
 		if (ncl->state) {
-			ncl->state = CLSTATE_LOBBY;
+			ncl->state = CLSTATE_DISCONNECTED;
 			ncl->player = NULL;
 			ncl->config = NULL;
 		}
 	}
+
+	g_NetLocalClient->state = CLSTATE_LOBBY;
 
 	g_NumReasonsToEndMpMatch = 1;
 	mainEndStage();

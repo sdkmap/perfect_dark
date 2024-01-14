@@ -27,6 +27,8 @@ s32 videoGetWidth(void);
 s32 videoGetHeight(void);
 f32 videoGetAspect(void);
 s32 videoGetFullscreen(void);
+s32 videoGetMaximizeWindow(void);
+void videoSetMaximizeWindow(s32 fs);
 u32 videoGetTextureFilter(void);
 u32 videoGetTextureFilter2D(void);
 
@@ -34,6 +36,7 @@ void videoSetWindowOffset(s32 x, s32 y);
 void videoSetFullscreen(s32 fs);
 void videoSetTextureFilter(u32 filter);
 void videoSetTextureFilter2D(u32 filter);
+void videoCapFramerate(s32 limit);
 
 s32 videoCreateFramebuffer(u32 w, u32 h, s32 upscale, s32 autoresize);
 void videoSetFramebuffer(s32 target);

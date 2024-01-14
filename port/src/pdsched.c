@@ -243,7 +243,12 @@ void schedStartFrame(OSSched *sc)
 {
 	videoStartFrame();
 	if (g_Vars.diffframe60) {
-		netStartFrame();
+		if (g_NetMode) {
+			videoCapFramerate(120);
+			netStartFrame();
+		} else {
+			videoCapFramerate(0);
+		}
 	}
 }
 
