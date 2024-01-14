@@ -368,11 +368,14 @@ static void netServerQueryResponse(ENetAddress *address)
 
 	// calculate and rewrite checksum
 	buf.wp = ebuf.dataLength - sizeof(u16);
-	u32 chk = 1;
+	u16 crc = 0xFFFF;
+	u16 x;
 	for (u32 i = 0; i < buf.wp; ++i) {
-		chk = (chk + buf.data[i]) % 65521;
+		x = crc >> 8 ^ buf.data[i];
+		x ^= x >> 4;
+		crc += (crc << 8) ^ (x << 12) ^ (x << 5) ^ x;
 	}
-	netbufWriteU16(&buf, chk);
+	netbufWriteU16(&buf, crc);
 
 	enet_socket_send(g_NetHost->socket, address, &ebuf, 1);
 }

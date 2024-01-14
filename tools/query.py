@@ -9,10 +9,13 @@ QUERY_MAGIC = b"PDQM\x01"
 MAX_WAIT = 5.0
 
 def checksum(data):
-  chk = 1
+  crc = 0xFFFF
   for b in data[:-2]:
-    chk = (chk + b) % 65521
-  return chk
+    x = crc >> 8 ^ b
+    x ^= x >> 4
+    crc += (crc << 8) ^ (x << 12) ^ (x << 5) ^ x
+    crc &= 0xFFFF
+  return crc
 
 def eat_string(data):
   strlen = struct.unpack_from("<H", data)[0]
