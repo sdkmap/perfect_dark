@@ -3322,7 +3322,7 @@ s32 func0f18d074(s32 index)
 
 	for (i = 0; i < MAX_BOTS; i++) {
 		if (&g_BotConfigsArray[i].base == g_MpAllChrConfigPtrs[index]) {
-			return i + 4;
+			return i + MAX_PLAYERS;
 		}
 	}
 
