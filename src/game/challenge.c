@@ -265,8 +265,10 @@ void challengePerformSanityChecks(void)
 			g_Vars.mphilltime = 10;
 		}
 	} else if (!challengeIsFeatureUnlocked(MPFEATURE_8BOTS)) {
-		// Limit to 4 players and 4 simulants
-#if MAX_PLAYERS > 4
+		// Limit to 4 players and 4 simulants in local games
+#ifndef PLATFORM_N64
+		g_MpSetup.chrslots &= (g_NetMode ? 0x0fff : 0x0f0f);
+#elif MAX_PLAYERS > 4
 		g_MpSetup.chrslots &= 0x0f0f;
 #else
 		g_MpSetup.chrslots &= 0x00ff;

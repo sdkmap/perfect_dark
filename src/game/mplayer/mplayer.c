@@ -191,9 +191,11 @@ void mpStartMatch(void)
 	if (g_NetMode == NETMODE_SERVER) {
 		g_MpSetup.chrslots &= 0xff00;
 		g_MpSetup.chrslots |= 1;
+		s32 slot = 1;
 		for (s32 i = 1; i < g_NetMaxClients; ++i) {
 			if (g_NetClients[i].state >= CLSTATE_LOBBY) {
-				g_MpSetup.chrslots |= (1 << i);
+				g_MpSetup.chrslots |= (1 << slot);
+				++slot;
 			}
 		}
 	}
@@ -2999,13 +3001,6 @@ struct mpchrconfig *mpGetChrConfigBySlotNum(s32 slot)
 			count++;
 		}
 	}
-
-#ifndef PLATFORM_N64
-	// ignore chrslots while setting up a netgame
-	if (!result && g_NetMode && slot < g_NetMaxClients && g_NetClients[slot].state >= CLSTATE_LOBBY) {
-		result = &g_PlayerConfigsArray[slot].base;
-	}
-#endif
 
 	return result;
 }

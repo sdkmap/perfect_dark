@@ -863,18 +863,28 @@ u32 netSend(struct netclient *dstcl, struct netbuf *buf, const s32 reliable, con
 
 void netPlayersAllocate(void)
 {
+	s32 playernum = 0;
+
+	if (g_NetMode == NETMODE_CLIENT) {
+		// we always put the local player at index 0, even client-side
+		// which means that clientside we have to put the server's player into our slot
+		const s32 svplayernum = g_NetLocalClient->playernum;
+		g_NetLocalClient->playernum = 0;
+		g_NetClients[0].playernum = svplayernum;
+	}
+
 	for (s32 i = 0; i < g_NetMaxClients; ++i) {
 		struct netclient *cl = &g_NetClients[i];
 		if (cl->state < CLSTATE_LOBBY) {
 			continue;
 		}
 
-		if (cl == g_NetLocalClient) {
-			// we always put the local player at index 0, even client-side
-			cl->playernum = 0;
-		} else {
-			// which means that clientside we have to put the server's player into our slot
-			cl->playernum = (g_NetMode == NETMODE_CLIENT && i == 0) ? g_NetLocalClient->id : cl->id;
+		if (g_NetMode == NETMODE_SERVER) {
+			// on the server allocate players sequentially
+			cl->playernum = playernum++;
+		}
+
+		if (cl != g_NetLocalClient) {
 			// disable controls for the remote pawns and set their settings
 			// TODO: backup the player configs or something
 			struct mpplayerconfig *cfg = &g_PlayerConfigsArray[cl->playernum];
@@ -934,14 +944,14 @@ void netSyncIdsAllocate(void)
 	// HACK: when we're a client, we'll need to swap our player and server player's props
 	// because of what we do in netPlayersAllocate
 	if (g_NetMode == NETMODE_CLIENT) {
-		if (!g_Vars.players[g_NetLocalClient->id]->prop || !g_Vars.players[0]->prop) {
+		if (!g_NetLocalClient->player || !g_NetLocalClient->player->prop) {
 			sysLogPrintf(LOG_ERROR, "NET: no props allocated for players?");
 			netDisconnect();
 			return;
 		}
-		const u16 sid = g_Vars.players[g_NetLocalClient->id]->prop->syncid;
-		g_Vars.players[g_NetLocalClient->id]->prop->syncid = g_Vars.players[0]->prop->syncid;
-		g_Vars.players[0]->prop->syncid = sid;
+		const u16 sid = g_NetClients[0].player->prop->syncid;
+		g_NetClients[0].player->prop->syncid = g_NetLocalClient->player->prop->syncid;
+		g_NetLocalClient->player->prop->syncid = sid;
 	}
 
 	sysLogPrintf(LOG_NOTE, "NET: last initial syncid: %u", g_NetNextSyncId);
