@@ -26,6 +26,8 @@
 #include "config.h"
 #include "system.h"
 #include "console.h"
+#include "fs.h"
+#include "romdata.h"
 #include "utils.h"
 
 s32 g_NetMode = NETMODE_NONE;
@@ -37,6 +39,7 @@ u32 g_NetServerUpdateRate = 1;
 u32 g_NetServerInRate = 128 * 1024;
 u32 g_NetServerOutRate = 128 * 1024;
 u32 g_NetServerPort = NET_DEFAULT_PORT;
+s32 g_NetServerInfoQuery = true;
 
 u32 g_NetClientUpdateRate = 1;
 u32 g_NetClientInRate = 128 * 1024;
@@ -330,6 +333,64 @@ static inline const char *netGetDisconnectReason(const u32 reason)
 	return msgs[0];
 }
 
+static void netServerQueryResponse(ENetAddress *address)
+{
+	static u8 data[256];
+	static ENetBuffer ebuf;
+	struct netbuf buf = { .data = data, .size = sizeof(data) };
+	const u8 flags = (g_NetLocalClient && g_NetLocalClient->state > CLSTATE_LOBBY)
+		| (0 << 1); // TODO: this will indicate coop/anti/etc
+	const char *modDir = fsGetModDir();
+	if (!modDir) {
+		modDir = "";
+	}
+
+	netbufStartWrite(&buf);
+	netbufWriteData(&buf, NET_QUERY_MAGIC, sizeof(NET_QUERY_MAGIC) - 1);
+	netbufWriteU16(&buf, 0); // space for size
+	netbufWriteU32(&buf, NET_PROTOCOL_VER);
+	netbufWriteU8(&buf, flags);
+	netbufWriteU8(&buf, g_NetNumClients);
+	netbufWriteU8(&buf, g_NetMaxClients);
+	netbufWriteU8(&buf, g_StageNum);
+	netbufWriteU8(&buf, g_MpSetup.scenario);
+	netbufWriteStr(&buf, g_NetLocalClient ? g_NetLocalClient->settings.name : "");
+	netbufWriteStr(&buf, g_RomName);
+	netbufWriteStr(&buf, modDir);
+	netbufWriteU16(&buf, 0); // space for checksum
+
+	ebuf.data = buf.data;
+	ebuf.dataLength = buf.wp;
+
+	// rewrite size
+	buf.wp = sizeof(NET_QUERY_MAGIC) - 1;
+	netbufWriteU16(&buf, ebuf.dataLength);
+
+	// calculate and rewrite checksum
+	buf.wp = ebuf.dataLength - sizeof(u16);
+	u32 chk = 1;
+	for (u32 i = 0; i < buf.wp; ++i) {
+		chk = (chk + buf.data[i]) % 65521;
+	}
+	netbufWriteU16(&buf, chk);
+
+	enet_socket_send(g_NetHost->socket, address, &ebuf, 1);
+}
+
+static s32 netServerConnectionlessPacket(ENetEvent *event, ENetAddress *address, u8 *rxdata, s32 rxlen)
+{
+	if (rxdata && rxlen >= 5) {
+		if (!memcmp(rxdata, NET_QUERY_MAGIC, sizeof(NET_QUERY_MAGIC) - 1)) {
+			// this is a query packet, respond with server status
+			sysLogPrintf(LOG_NOTE | LOGFLAG_NOCON, "NET: query request from %s, responding", netFormatAddr(address));
+			netServerQueryResponse(address);
+			return 1;
+		}
+	}
+	// probably a normal packet, pass through to enet
+	return 0;
+}
+
 struct netclient *netClientForPlayerNum(s32 playernum)
 {
 	s32 slot = 0;
@@ -387,6 +448,10 @@ s32 netStartServer(u16 port, s32 maxclients)
 	if (!g_NetHost) {
 		sysLogPrintf(LOG_ERROR, "NET: could not create ENet host");
 		return -2;
+	}
+
+	if (g_NetServerInfoQuery) {
+		enet_host_set_intercept_callback(g_NetHost, netServerConnectionlessPacket);
 	}
 
 	netClientResetAll();
@@ -474,6 +539,8 @@ s32 netStartClient(const char *addr)
 		return -3;
 	}
 
+	enet_host_set_intercept_callback(g_NetHost, NULL);
+
 	// save the address since it appears to be valid
 	strncpy(g_NetLastJoinAddr, addr, NET_MAX_ADDR);
 
@@ -513,6 +580,9 @@ s32 netDisconnect(void)
 	if (!g_NetMode) {
 		return -1;
 	}
+
+	// stop responding to connectionless packets
+	enet_host_set_intercept_callback(g_NetHost, NULL);
 
 	const bool wasingame = (g_NetLocalClient->state >= CLSTATE_GAME);
 
@@ -1049,4 +1119,5 @@ PD_CONSTRUCTOR static void netConfigInit(void)
 	configRegisterUInt("Net.Server.InRate", &g_NetServerInRate, 0, 10 * 1024 * 1024);
 	configRegisterUInt("Net.Server.OutRate", &g_NetServerOutRate, 0, 10 * 1024 * 1024);
 	configRegisterUInt("Net.Server.UpdateFrames", &g_NetServerUpdateRate, 0, 60);
+	configRegisterInt("Net.Server.AllowInfoQuery", &g_NetServerInfoQuery, 0, 1);
 }
