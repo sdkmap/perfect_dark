@@ -934,6 +934,11 @@ void netSyncIdsAllocate(void)
 	// HACK: when we're a client, we'll need to swap our player and server player's props
 	// because of what we do in netPlayersAllocate
 	if (g_NetMode == NETMODE_CLIENT) {
+		if (!g_Vars.players[g_NetLocalClient->id]->prop || !g_Vars.players[0]->prop) {
+			sysLogPrintf(LOG_ERROR, "NET: no props allocated for players?");
+			netDisconnect();
+			return;
+		}
 		const u16 sid = g_Vars.players[g_NetLocalClient->id]->prop->syncid;
 		g_Vars.players[g_NetLocalClient->id]->prop->syncid = g_Vars.players[0]->prop->syncid;
 		g_Vars.players[0]->prop->syncid = sid;
