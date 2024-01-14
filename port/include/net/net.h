@@ -148,6 +148,8 @@ void netServerStageStart(void);
 void netServerStageEnd(void);
 void netServerKick(struct netclient *cl, const u32 reason);
 
+struct netclient *netClientForPlayerNum(s32 playernum);
+
 void netClientSyncRng(void);
 void netClientSettingsChanged(void);
 

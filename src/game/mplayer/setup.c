@@ -23,6 +23,9 @@
 #include "data.h"
 #include "gbiex.h"
 #include "types.h"
+#ifndef PLATFORM_N64
+#include "net/net.h"
+#endif
 
 struct menuitem g_MpCharacterMenuItems[];
 struct menudialogdef g_MpAddSimulantMenuDialog;
@@ -2297,6 +2300,15 @@ MenuItemHandlerResult menuhandlerMpHandicapPlayer(s32 operation, struct menuitem
 char *mpMenuTextHandicapPlayerName(struct menuitem *item)
 {
 	if (g_MpSetup.chrslots & (1 << item->param)) {
+#ifndef PLATFORM_N64
+		if (g_NetMode) {
+			// use client names directly, as the config names are not set yet
+			struct netclient *cl = netClientForPlayerNum(item->param);
+			if (cl) {
+				return cl->settings.name;
+			}
+		}
+#endif
 		return g_PlayerConfigsArray[item->param].base.name;
 	}
 
@@ -2598,6 +2610,40 @@ struct menuitem g_MpHandicapsMenuItems[] = {
 		0x000000ff,
 		menuhandlerMpHandicapPlayer,
 	},
+#if MAX_PLAYERS > 4
+	{
+		MENUITEMTYPE_SLIDER,
+		4,
+		MENUITEMFLAG_LESSLEFTPADDING | MENUITEMFLAG_LOCKABLEMINOR,
+		(uintptr_t)&mpMenuTextHandicapPlayerName,
+		0x000000ff,
+		menuhandlerMpHandicapPlayer,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		5,
+		MENUITEMFLAG_LESSLEFTPADDING | MENUITEMFLAG_LOCKABLEMINOR,
+		(uintptr_t)&mpMenuTextHandicapPlayerName,
+		0x000000ff,
+		menuhandlerMpHandicapPlayer,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		6,
+		MENUITEMFLAG_LESSLEFTPADDING | MENUITEMFLAG_LOCKABLEMINOR,
+		(uintptr_t)&mpMenuTextHandicapPlayerName,
+		0x000000ff,
+		menuhandlerMpHandicapPlayer,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		7,
+		MENUITEMFLAG_LESSLEFTPADDING | MENUITEMFLAG_LOCKABLEMINOR,
+		(uintptr_t)&mpMenuTextHandicapPlayerName,
+		0x000000ff,
+		menuhandlerMpHandicapPlayer,
+	},
+#endif
 	{
 		MENUITEMTYPE_SEPARATOR,
 		0,
@@ -3407,6 +3453,15 @@ char *mpMenuTextChrNameForTeamSetup(struct menuitem *item)
 	struct mpchrconfig *mpchr = mpGetChrConfigBySlotNum(item->param);
 
 	if (mpchr) {
+#ifndef PLATFORM_N64
+		if (g_NetMode) {
+			// use client names directly, as the config names are not set yet
+			struct netclient *cl = netClientForPlayerNum(item->param);
+			if (cl) {
+				return cl->settings.name;
+			}
+		}
+#endif
 		return mpchr->name;
 	}
 

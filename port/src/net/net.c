@@ -330,6 +330,21 @@ static inline const char *netGetDisconnectReason(const u32 reason)
 	return msgs[0];
 }
 
+struct netclient *netClientForPlayerNum(s32 playernum)
+{
+	s32 slot = 0;
+	for (s32 i = 0; i < g_NetMaxClients; ++i) {
+		struct netclient *cl = &g_NetClients[i];
+		if (cl->state >= CLSTATE_LOBBY) {
+			if (slot == playernum) {
+				return cl;
+			}
+			++slot;
+		}
+	}
+	return NULL;
+}
+
 void netInit(void)
 {
 	if (enet_initialize() < 0) {
