@@ -2056,6 +2056,15 @@ void playerTickCutscene(bool arg0)
 		}
 	}
 #endif
+
+#ifndef PLATFORM_N64
+	if (g_Vars.stagenum == STAGE_CITRAINING) {
+		if (g_CutsceneCurTotalFrame60f > 10 && (g_NetHostLatch || g_NetJoinLatch)) {
+			// just booted up and host/join was requested from command line, skip the intro cutscene
+			g_CutsceneSkipRequested = true;
+		}
+	}
+#endif
 }
 
 f32 playerGetCutsceneBlurFrac(void)
