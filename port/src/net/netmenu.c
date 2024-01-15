@@ -354,6 +354,7 @@ MenuItemHandlerResult menuhandlerHostGame(s32 operation, struct menuitem *item, 
 {
 	if (operation == MENUOP_SET) {
 		g_NetMenuPort = g_NetServerPort;
+		g_NetMenuMaxPlayers = g_NetMaxClients;
 		menuPushDialog(&g_NetHostMenuDialog);
 	}
 
