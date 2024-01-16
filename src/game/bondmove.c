@@ -123,6 +123,8 @@ static inline void bmoveProcessRemoteInput(const bool allowc1buttons)
 		moveticks = g_NetInterpTicks;
 	}
 
+	const bool handled = (pl->client->inmovetick >= inmove->tick);
+
 	if (!inmove->tick) {
 		// no input
 		inmove->pos = inmoveprev->pos = pl->prop->pos;
@@ -206,12 +208,12 @@ static inline void bmoveProcessRemoteInput(const bool allowc1buttons)
 		netmsgSvcPlayerStatsWrite(&g_NetMsgRel, pl->client);
 	}
 
-	if (inmove->ucmd & UCMD_RELOAD) {
+	if (!handled && (inmove->ucmd & UCMD_RELOAD)) {
 		pl->bondactivateorreload |= JO_ACTION_RELOAD;
 	}
 
 	if (g_NetMode == NETMODE_SERVER) {
-		if (inmove->ucmd & UCMD_ACTIVATE) {
+		if (!handled && (inmove->ucmd & UCMD_ACTIVATE)) {
 			pl->bondactivateorreload |= JO_ACTION_ACTIVATE;
 		}
 

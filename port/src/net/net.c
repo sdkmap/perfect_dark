@@ -262,7 +262,8 @@ static inline s32 netClientNeedReliableMove(const struct netclient *cl)
 	const struct netplayermove *move = &cl->outmove[0];
 	const struct netplayermove *moveprev = &cl->outmove[1];
 	return !moveprev->tick || (g_NetMode == NETMODE_SERVER && cl->forcetick) ||
-		(moveprev->ucmd & UCMD_IMPORTANT_MASK) != (move->ucmd & UCMD_IMPORTANT_MASK);
+		(moveprev->ucmd & UCMD_IMPORTANT_MASK) != (move->ucmd & UCMD_IMPORTANT_MASK) ||
+		(move->ucmd & UCMD_ACTIVATE);
 }
 
 static inline s32 netClientNeedMove(const struct netclient *cl)
