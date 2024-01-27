@@ -5385,7 +5385,7 @@ Gfx *menuRender(Gfx *gdl)
 				}
 				x = viewleft + 2;
 				y = viewbottom - 9;
-				colour = 0x5070ffff;
+				colour = 0x00ff00ff;
 				gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, colour, viGetWidth(), viGetHeight(), 0, 0);
 			} else
 #endif
