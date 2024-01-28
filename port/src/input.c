@@ -1287,6 +1287,51 @@ char inputGetLastTextChar(void)
 	return lastChar;
 }
 
+s32 inputTextHandler(char *out, const u32 outSize, s32 *curCol)
+{
+	const s32 ctrlHeld = inputKeyPressed(VK_LCTRL) || inputKeyPressed(VK_RCTRL);
+
+	if (!ctrlHeld) {
+		const char chr = inputGetLastTextChar();
+		inputClearLastTextChar();
+		if (chr && isprint(chr)) {
+			if (*curCol < outSize - 1) {
+				out[(*curCol)++] = chr;
+				out[*curCol] = '\0';
+			}
+		}
+	}
+
+	const s32 key = inputGetLastKey();
+	inputClearLastKey();
+	if (ctrlHeld && (key == VK_A + ('v' - 'a'))) {
+		// CTRL+V; paste from clipboard
+		const char *clip = inputGetClipboard();
+		if (clip) {
+			const s32 remain = outSize - *curCol - 1;
+			inputClearClipboard();
+			*curCol += snprintf(out + *curCol, remain, "%s", clip);
+			if (*curCol > outSize) {
+				*curCol = outSize;
+			}
+		}
+	} else if (key == VK_BACKSPACE) {
+		if (*curCol) {
+			out[--*curCol] = '\0';
+		} else {
+			out[0] = '\0';
+		}
+	} else if (key == VK_RETURN) {
+		if (out[0] && *curCol) {
+			return 1;
+		}
+	} else if (key == VK_ESCAPE) {
+		return -1;
+	}
+
+	return 0;
+}
+
 void inputClearClipboard(void)
 {
 	if (clipboardText) {
@@ -1301,6 +1346,12 @@ const char *inputGetClipboard(void)
 		char *text = SDL_GetClipboardText();
 		if (text) {
 			clipboardText = text;
+			// remove non-printable and multibyte chars
+			for (; *text; ++text) {
+				if ((u8)*text < 0x20 || (u8)*text >= 0x7F) {
+					*text = '?';
+				}
+			}
 		}
 	}
 	return clipboardText;

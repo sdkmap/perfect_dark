@@ -236,47 +236,11 @@ static MenuItemHandlerResult menuhandlerEnterJoinAddress(s32 operation, struct m
 		return 0;
 	}
 
-	const s32 key = inputGetLastKey();
-	char chr = '\0';
-	switch (key) {
-		case 0:
-			return 0;
-		case VK_ESCAPE:
-			menuPopDialog();
-			break;
-		case VK_BACKSPACE:
-			if (g_NetJoinAddrPtr) {
-				g_NetJoinAddr[--g_NetJoinAddrPtr] = '\0';
-			} else {
-				g_NetJoinAddr[0] = '\0';
-			}
-			break;
-		case VK_A ... VK_Z: chr = 'a' + key - VK_A; break;
-		case VK_1 ... VK_9: chr = '1' + key - VK_1; break;
-		case VK_0: chr = '0'; break;
-		case VK_PERIOD: chr = '.'; break;
-		case VK_SEMICOLON: chr = ':'; break;
-		case VK_LEFTBRACKET: chr = '['; break;
-		case VK_RIGHTBRACKET: chr = ']'; break;
-		case VK_MINUS: chr = '-'; break;
-		default:
-			break;
+	if (inputTextHandler(g_NetJoinAddr, NET_MAX_ADDR, &g_NetJoinAddrPtr) < 0) {
+		// escape has been pressed, stop editing
+		inputStopTextInput();
+		menuPopDialog();
 	}
-
-	if (chr == 'v' && (inputKeyPressed(VK_LCTRL) || inputKeyPressed(VK_RCTRL))) {
-		// try to paste in from clipboard
-		const char *clip = inputGetClipboard();
-		if (clip) {
-			strncpy(g_NetJoinAddr, clip, sizeof(g_NetJoinAddr) - 1);
-			g_NetJoinAddrPtr = strlen(g_NetJoinAddr);
-			inputClearClipboard();
-		}
-	} else if (chr && g_NetJoinAddrPtr < sizeof(g_NetJoinAddr) - 1) {
-		g_NetJoinAddr[g_NetJoinAddrPtr++] = chr;
-		g_NetJoinAddr[g_NetJoinAddrPtr + 1] = '\0';
-	}
-
-	inputClearLastKey();
 
 	return 0;
 }
@@ -285,6 +249,8 @@ static MenuItemHandlerResult menuhandlerJoinAddress(s32 operation, struct menuit
 {
 	if (operation == MENUOP_SET) {
 		inputClearLastKey();
+		inputClearLastTextChar();
+		inputStartTextInput();
 		g_NetJoinAddrPtr = strlen(g_NetJoinAddr);
 		menuPushDialog(&g_NetJoinAddressDialog);
 	}

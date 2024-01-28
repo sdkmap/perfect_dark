@@ -225,6 +225,8 @@ void inputStopTextInput(void);
 void inputClearLastTextChar(void);
 char inputGetLastTextChar(void);
 
+s32 inputTextHandler(char *out, const u32 outSize, s32 *curCol);
+
 void inputClearClipboard(void);
 const char *inputGetClipboard(void);
 

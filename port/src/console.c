@@ -202,30 +202,12 @@ void conTick(void)
 	conButton = button;
 
 	if (conOpen) {
-		char chr = inputGetLastTextChar();
-		if (chr && isprint(chr)) {
-			if (conInputCol < CON_COLS) {
-				conInput[conInputCol++] = chr;
-				conInput[conInputCol] = '\0';
-			}
-		}
-		const s32 key = inputGetLastKey();
-		if (key == VK_BACKSPACE) {
-			if (conInputCol) {
-				conInput[--conInputCol] = '\0';
-			} else {
-				conInput[0] = '\0';
-			}
-		} else if (key == VK_RETURN) {
-			if (conInput[0] && conInputCol) {
-				if (g_NetMode) {
-					netChat(NULL, conInput);
-				}
+		if (inputTextHandler(conInput, CON_COLS, &conInputCol)) {
+			if (g_NetMode) {
+				netChat(NULL, conInput);
 			}
 			conInput[0] = '\0';
 			conInputCol = 0;
 		}
-		inputClearLastTextChar();
-		inputClearLastKey();
 	}
 }
