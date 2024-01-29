@@ -1,4 +1,4 @@
-# Perfect Dark port
+# Perfect Dark port-net
 
 ## Experimental netplay branch
 
@@ -50,9 +50,9 @@ though you might have to install some additional libraries.
 
 ## Download
 
-Latest [automatic builds](https://github.com/fgsfdsfgs/perfect_dark/actions) for supported platforms:
-* [i686-windows](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port-net/pd-i686-windows.zip)
-* [i686-linux](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port-net/pd-i686-linux.zip)
+Latest (netplay) [automatic builds](https://github.com/fgsfdsfgs/perfect_dark/actions) for supported platforms:
+* [i686-windows (port-net/netplay)](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port-net/pd-i686-windows.zip)
+* [i686-linux (port-net/netplay)](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port-net/pd-i686-linux.zip)
 
 ## Running
 
