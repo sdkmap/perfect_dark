@@ -64,7 +64,7 @@ while True:
     break
 
   for (key, mask) in events:
-    data = sock.recv(256)
+    data, from_addr = sock.recvfrom(256)
 
     # check magic
     if data[:5] != QUERY_MAGIC:
@@ -93,6 +93,7 @@ while True:
     romname, data = eat_string(data)
     moddir, data = eat_string(data)
 
+    print("address:", from_addr)
     print("protocol ver:", msgdata[0])
     print("in progress:", msgdata[1])
     print("clients: {0}/{1}".format(msgdata[2], msgdata[3]))
