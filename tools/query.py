@@ -49,6 +49,7 @@ if ':' in host:
   sockfam = socket.AF_INET6
 
 sock = socket.socket(sockfam, socket.SOCK_DGRAM)
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
 sock.settimeout(MAX_WAIT)
 
 # send query magic to server
