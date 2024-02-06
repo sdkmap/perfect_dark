@@ -2,7 +2,7 @@
 
 # simple client for server status queries
 
-import sys, os, socket, struct, time
+import sys, os, socket, struct, selectors
 
 DEFAULT_PORT = 27100
 QUERY_MAGIC = b"PDQM\x01"
@@ -48,47 +48,59 @@ sockfam = socket.AF_INET
 if ':' in host:
   sockfam = socket.AF_INET6
 
+sel = selectors.DefaultSelector()
 sock = socket.socket(sockfam, socket.SOCK_DGRAM)
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
 sock.settimeout(MAX_WAIT)
+sel.register(sock, selectors.EVENT_READ, None)
 
-# send query magic to server
+# send query magic to server(s)
 sock.sendto(QUERY_MAGIC, (host, port))
 
-# wait for response
-data = sock.recv(256)
+while True:
+  # wait for response
+  events = sel.select(1.0)  # timeout in seconds
+  if not events:
+    break
 
-# check magic
-if data[:5] != QUERY_MAGIC:
-  print("invalid magic: expected", QUERY_MAGIC, "got", data[:5])
-  sys.exit(1)
+  for (key, mask) in events:
+    data, from_addr = sock.recvfrom(256)
 
-# check checksum
-chkremote = struct.unpack("<H", data[-2:])[0]
-chklocal = checksum(data)
-if chkremote != chklocal:
-  print("invalid checksum: expected", chklocal, "got", chkremote)
-  sys.exit(1)
+    # check magic
+    if data[:5] != QUERY_MAGIC:
+      print("invalid magic: expected", QUERY_MAGIC, "got", data[:5])
+      sys.exit(1)
 
-# check size
-datalen = struct.unpack("<H", data[5:7])[0]
-if datalen > len(data):
-  print("invalid size: expected", len(data), "got", datalen)
-  sys.exit(1)
+    # check checksum
+    chkremote = struct.unpack("<H", data[-2:])[0]
+    chklocal = checksum(data)
+    if chkremote != chklocal:
+      print("invalid checksum: expected", chklocal, "got", chkremote)
+      sys.exit(1)
 
-data = data[7:datalen - 2]
+    # check size
+    datalen = struct.unpack("<H", data[5:7])[0]
+    if datalen > len(data):
+      print("invalid size: expected", len(data), "got", datalen)
+      sys.exit(1)
 
-# unpack fixed size part of the response
-msgdata = struct.unpack_from("<LBBBBB", data)
-# unpack strings from the end of the response
-hostname, data = eat_string(data[9:])
-romname, data = eat_string(data)
-moddir, data = eat_string(data)
+    data = data[7:datalen - 2]
 
-print("protocol ver:", msgdata[0])
-print("in progress:", msgdata[1])
-print("clients: {0}/{1}".format(msgdata[2], msgdata[3]))
-print("stage num:", hex(msgdata[4]))
-print("scenario:", msgdata[5])
-print("host name:", hostname)
-print("rom name:", romname)
-print("mod dir:", moddir)
+    # unpack fixed size part of the response
+    msgdata = struct.unpack_from("<LBBBBB", data)
+    # unpack strings from the end of the response
+    hostname, data = eat_string(data[9:])
+    romname, data = eat_string(data)
+    moddir, data = eat_string(data)
+
+    print("address:", from_addr)
+    print("protocol ver:", msgdata[0])
+    print("in progress:", msgdata[1])
+    print("clients: {0}/{1}".format(msgdata[2], msgdata[3]))
+    print("stage num:", hex(msgdata[4]))
+    print("scenario:", msgdata[5])
+    print("host name:", hostname)
+    print("rom name:", romname)
+    print("mod dir:", moddir)
+    print("-"*40)
+
