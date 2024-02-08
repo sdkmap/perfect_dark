@@ -1702,7 +1702,7 @@ void endscreenPushCoop(void)
 		// Failed or aborted
 		if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL
 #ifndef PLATFORM_N64
-			|| PLAYERCOUNT() >= 3
+			|| LOCALPLAYERCOUNT() >= 3
 #endif
 		) {
 			menuPushRootDialog(&g_2PMissionEndscreenFailedVMenuDialog, MENUROOT_MPENDSCREEN);
@@ -1713,7 +1713,7 @@ void endscreenPushCoop(void)
 		// Completed
 		if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL
 #ifndef PLATFORM_N64
-			|| PLAYERCOUNT() >= 3
+			|| LOCALPLAYERCOUNT() >= 3
 #endif
 		) {
 			menuPushRootDialog(&g_2PMissionEndscreenCompletedVMenuDialog, MENUROOT_MPENDSCREEN);
@@ -1803,7 +1803,7 @@ void endscreenPushAnti(void)
 			// Bond - failed or aborted
 			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL
 #ifndef PLATFORM_N64
-				|| PLAYERCOUNT() >= 3
+				|| LOCALPLAYERCOUNT() >= 3
 #endif
 			) {
 				menuPushRootDialog(&g_2PMissionEndscreenFailedVMenuDialog, MENUROOT_MPENDSCREEN);
@@ -1814,7 +1814,7 @@ void endscreenPushAnti(void)
 			// Bond - completed
 			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL
 #ifndef PLATFORM_N64
-				|| PLAYERCOUNT() >= 3
+				|| LOCALPLAYERCOUNT() >= 3
 #endif
 			) {
 				menuPushRootDialog(&g_2PMissionEndscreenCompletedVMenuDialog, MENUROOT_MPENDSCREEN);
@@ -1834,7 +1834,7 @@ void endscreenPushAnti(void)
 			// Anti - completed
 			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL
 #ifndef PLATFORM_N64
-				|| PLAYERCOUNT() >= 3
+				|| LOCALPLAYERCOUNT() >= 3
 #endif
 			) {
 				menuPushRootDialog(&g_2PMissionEndscreenCompletedVMenuDialog, MENUROOT_MPENDSCREEN);
@@ -1845,7 +1845,7 @@ void endscreenPushAnti(void)
 			// Anti - failed or aborted
 			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL
 #ifndef PLATFORM_N64
-				|| PLAYERCOUNT() >= 3
+				|| LOCALPLAYERCOUNT() >= 3
 #endif
 			) {
 				menuPushRootDialog(&g_2PMissionEndscreenFailedVMenuDialog, MENUROOT_MPENDSCREEN);

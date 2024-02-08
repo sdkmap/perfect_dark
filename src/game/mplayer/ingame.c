@@ -802,7 +802,7 @@ void mpPushPauseDialog(void)
 			} else {
 				if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL
 #ifndef PLATFORM_N64
-					|| PLAYERCOUNT() >= 3
+					|| LOCALPLAYERCOUNT() >= 3
 #endif
 				) {
 					menuPushRootDialog(&g_2PMissionPauseVMenuDialog, MENUROOT_MPPAUSE);
