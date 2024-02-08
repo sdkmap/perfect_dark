@@ -256,7 +256,12 @@ void mpReset(void)
 		g_Vars.lvmpbotlevel = true;
 	}
 
-	if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) {
+#ifdef PLATFORM_N64
+	if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
+#else
+	if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && getNumPlayers() <= 2)
+#endif
+	{
 		struct mpplayerconfig tmp;
 
 		tmp = g_PlayerConfigsArray[MAX_PLAYERS];
@@ -1333,7 +1338,11 @@ Gfx *mpRenderModalText(Gfx *gdl)
 			&& g_Vars.currentplayer->redbloodfinished
 			&& g_Vars.currentplayer->deathanimfinished
 			&& !(g_Vars.coopplayernum >= 0 && ((g_Vars.bond->isdead && g_Vars.coop->isdead) || !g_Vars.currentplayer->coopcanrestart || g_InCutscene))
+#ifdef PLATFORM_N64
 			&& !(g_Vars.antiplayernum >= 0 && ((g_Vars.currentplayer != g_Vars.anti || g_InCutscene)))
+#else
+			&& !(g_Vars.antiplayernum >= 0 && ((g_Vars.currentplayer == g_Vars.bond || g_InCutscene)))
+#endif
 			&& g_NumReasonsToEndMpMatch == 0) {
 		// Render "Press START" text
 		gdl = text0f153628(gdl);

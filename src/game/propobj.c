@@ -15942,7 +15942,14 @@ void objHit(struct shotdata *shotdata, struct hit *hit)
 		}
 	}
 
-	if (g_Vars.antiplayernum < 0 || g_Vars.currentplayer != g_Vars.anti || (obj->flags2 & OBJFLAG2_IMMUNETOANTI) == 0) {
+	if (g_Vars.antiplayernum < 0
+#ifdef PLATFORM_N64
+			|| g_Vars.currentplayer != g_Vars.anti
+#else
+			|| g_Vars.currentplayer == g_Vars.bond
+#endif
+			|| (obj->flags2 & OBJFLAG2_IMMUNETOANTI) == 0) {
+
 		if (hit->hitthing.texturenum != 10000) {
 			f32 damage = gsetGetDamage(&shotdata->gset);
 

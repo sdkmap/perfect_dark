@@ -465,7 +465,13 @@ void mainLoop(void)
 		}
 
 		if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) {
+#ifdef PLATFORM_N64
 			g_MpSetup.chrslots = 0x03;
+#else
+			if (getNumPlayers() <= 2) {
+				g_MpSetup.chrslots = 0x03;
+			}
+#endif
 			mpReset();
 		} else if (g_Vars.perfectbuddynum) {
 			mpReset();

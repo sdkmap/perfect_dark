@@ -2358,7 +2358,12 @@ void propsTestForPickup(void)
 
 	if (g_Vars.currentplayer->bondmovemode != MOVEMODE_CUTSCENE
 			&& !g_PlayerInvincible
-			&& g_Vars.currentplayer != g_Vars.anti) {
+#ifdef PLATFORM_N64
+			&& g_Vars.currentplayer != g_Vars.anti
+#else
+			&& (g_Vars.antiplayernum < 0 || g_Vars.currentplayer == g_Vars.bond)
+#endif
+			) {
 		roomsCopy(g_Vars.currentplayer->prop->rooms, allrooms);
 
 		for (i = 0; g_Vars.currentplayer->prop->rooms[i] != -1; i++) {

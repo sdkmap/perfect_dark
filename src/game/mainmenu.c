@@ -757,7 +757,20 @@ MenuItemHandlerResult menuhandlerAcceptMission(s32 operation, struct menuitem *i
 			}
 
 			g_Vars.coopplayernum = -1;
+#ifdef PLATFORM_N64
 			setNumPlayers(2);
+#else
+			if ((joyGetConnectedControllers() & 0xF) == 0xF) {
+				setNumPlayers(4);
+				g_MpSetup.chrslots = 0xF;
+			} else if ((joyGetConnectedControllers() & 0x7) == 0x7) {
+				setNumPlayers(3);
+				g_MpSetup.chrslots = 0x7;
+			} else {
+				setNumPlayers(2);
+				g_MpSetup.chrslots = 0x3;
+			}
+#endif
 		} else {
 			// Solo
 			g_Vars.bondplayernum = 0;
