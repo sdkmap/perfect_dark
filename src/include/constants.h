@@ -82,6 +82,18 @@
 #define PLAYERCOUNT()       1
 #endif
 
+#if MAX_LOCAL_PLAYERS > 2
+#define PLAYER_IS_ANTI(plr) (g_Vars.antiplayernum >= 0 && (plr) != g_Vars.bond)
+#define PLAYER_IS_NOT_ANTI(plr) (g_Vars.antiplayernum < 0 || (plr) == g_Vars.bond)
+#define PROP_IS_FOR_ANTI_PLAYER(plrprop) (g_Vars.antiplayernum >= 0 && g_Vars.anti && (plrprop)->type == PROPTYPE_PLAYER && (plrprop) != g_Vars.bond->prop)
+#define EXPLOSION_OWNER_IS_ANTI_PLAYER(expowner) (g_Vars.antiplayernum >= 0 && (expowner) != g_Vars.bondplayernum && mpGetChrFromPlayerIndex((expowner)) != NULL)
+#else
+#define PLAYER_IS_ANTI(plr) ((plr) == g_Vars.anti)
+#define PLAYER_IS_NOT_ANTI(plr) ((plr) != g_Vars.anti)
+#define PROP_IS_FOR_ANTI_PLAYER(plrprop) ((plrprop) == g_Vars.anti->prop)
+#define EXPLOSION_OWNER_IS_ANTI_PLAYER(expowner) ((expowner) == g_Vars.antiplayernum)
+#endif
+
 #define VALIDWEAPON()       (g_Vars.currentplayer->gunctrl.weaponnum >= WEAPON_UNARMED && g_Vars.currentplayer->gunctrl.weaponnum <= WEAPON_COMBATBOOST)
 #define FUNCISSEC()         (VALIDWEAPON() && (g_PlayerConfigsArray[g_Vars.currentplayerstats->mpindex].gunfuncs[(g_Vars.currentplayer->gunctrl.weaponnum - 1) >> 3] & (1 << ((g_Vars.currentplayer->gunctrl.weaponnum - 1) & 7))))
 

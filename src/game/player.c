@@ -606,13 +606,7 @@ void playerStartNewLife(void)
 		if (cmd);
 		if (cmd);
 
-		if (g_Vars.antiplayernum < 0
-#ifdef PLATFORM_N64
-				|| g_Vars.currentplayer != g_Vars.anti
-#else
-				|| g_Vars.currentplayer == g_Vars.bond
-#endif
-				) {
+		if (g_Vars.antiplayernum < 0 || PLAYER_IS_NOT_ANTI(g_Vars.currentplayer)) {
 			while (cmd[0] != INTROCMD_END) {
 				switch (cmd[0]) {
 				case INTROCMD_SPAWN:
@@ -986,13 +980,7 @@ void playerSpawn(void)
 	}
 
 	if (g_Vars.mplayerisrunning) {
-		if (g_Vars.antiplayernum >= 0
-#ifdef PLATFORM_N64
-				&& g_Vars.currentplayer == g_Vars.anti
-#else
-				&& g_Vars.currentplayer != g_Vars.bond
-#endif
-				) {
+		if (g_Vars.antiplayernum >= 0 && PLAYER_IS_ANTI(g_Vars.currentplayer)) {
 			numsqdists = 0;
 			force = false;
 
@@ -1194,11 +1182,7 @@ void playerChooseBodyAndHead(s32 *bodynum, s32 *headnum, s32 *arg2)
 	bool solo;
 
 	if (g_Vars.antiplayernum >= 0
-#ifdef PLATFORM_N64
-			&& g_Vars.currentplayer == g_Vars.anti
-#else
-			&& g_Vars.currentplayer != g_Vars.bond
-#endif
+			&& PLAYER_IS_ANTI(g_Vars.currentplayer)
 			&& g_Vars.antiheadnum >= 0
 			&& g_Vars.antibodynum >= 0) {
 		*headnum = g_Vars.antiheadnum;
@@ -1530,11 +1514,7 @@ void playerTickChrBody(void)
 
 #if VERSION >= VERSION_NTSC_1_0
 		if (g_Vars.antiplayernum >= 0
-#ifdef PLATFORM_N64
-				&& g_Vars.currentplayer == g_Vars.anti
-#else
-				&& g_Vars.currentplayer != g_Vars.bond
-#endif
+				&& PLAYER_IS_ANTI(g_Vars.currentplayer)
 				&& g_Vars.currentplayer->vv_eyeheight > 159) {
 			g_Vars.currentplayer->vv_eyeheight = 159;
 		}
@@ -4733,13 +4713,7 @@ Gfx *playerRenderHud(Gfx *gdl)
 							chr->chrflags |= CHRCFLAG_HIDDEN;
 						}
 
-						if (g_Vars.antiplayernum >= 0
-#ifdef PLATFORM_N64
-								&& g_Vars.currentplayer == g_Vars.anti
-#else
-								&& g_Vars.currentplayer != g_Vars.bond
-#endif
-								) {
+						if (g_Vars.antiplayernum >= 0 && PLAYER_IS_ANTI(g_Vars.currentplayer)) {
 							// Anti
 #ifndef PLATFORM_N64
 							if (g_NetMode == NETMODE_SERVER && g_Vars.currentplayer->isremote) {

@@ -9148,7 +9148,7 @@ void autogunTickShoot(struct prop *autogunprop)
 				// (ie. autogun is a Defense autogun or a thrown laptop)
 				if (g_Vars.normmplayerisrunning
 						|| (targetprop && (targetprop->type == PROPTYPE_CHR))
-						|| (g_Vars.antiplayernum >= 0 && targetprop && targetprop == g_Vars.anti->prop)) {
+						|| (g_Vars.antiplayernum >= 0 && targetprop && PROP_IS_FOR_ANTI_PLAYER(targetprop))) {
 					if (cdExamLos08(&gunpos, gunrooms, &hitpos, CDTYPE_ALL, GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
 #if VERSION >= VERSION_PAL_FINAL
 						cdGetPos(&hitpos, 11480, "prop/propobj.c");
@@ -15943,11 +15943,7 @@ void objHit(struct shotdata *shotdata, struct hit *hit)
 	}
 
 	if (g_Vars.antiplayernum < 0
-#ifdef PLATFORM_N64
-			|| g_Vars.currentplayer != g_Vars.anti
-#else
-			|| g_Vars.currentplayer == g_Vars.bond
-#endif
+			|| PLAYER_IS_NOT_ANTI(g_Vars.currentplayer)
 			|| (obj->flags2 & OBJFLAG2_IMMUNETOANTI) == 0) {
 
 		if (hit->hitthing.texturenum != 10000) {

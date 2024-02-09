@@ -4351,14 +4351,7 @@ void chrDamage(struct chrdata *chr, f32 damage, struct coord *vector, struct gse
 	// Don't damage if attacker was anti and chr is non-interactable by anti
 	if (g_Vars.antiplayernum >= 0
 			&& aprop
-
-#ifdef PLATFORM_N64
-			&& aprop == g_Vars.anti->prop
-#else
-			&& aprop->type == PROPTYPE_PLAYER
-			&& aprop != g_Vars.bond->prop
-#endif
-
+			&& PROP_IS_FOR_ANTI_PLAYER(aprop)
 			&& (chr->hidden & CHRHFLAG_ANTINONINTERACTABLE)) {
 		return;
 	}
@@ -4498,13 +4491,7 @@ void chrDamage(struct chrdata *chr, f32 damage, struct coord *vector, struct gse
 
 		// Anti shooting other enemies is lethal
 		if (aprop
-#ifdef PLATFORM_N64
-				&& aprop == g_Vars.anti->prop
-#else
-				&& aprop->type == PROPTYPE_PLAYER
-				&& aprop != g_Vars.bond->prop
-#endif
-
+				&& PROP_IS_FOR_ANTI_PLAYER(aprop)
 				&& vprop != g_Vars.bond->prop) {
 			damage *= 100;
 		}
@@ -8336,14 +8323,7 @@ void chrAlertOthersOfInjury(struct chrdata *chr, bool dying)
 	s32 numinrange = 0;
 	s32 numchrs = chrsGetNumSlots();
 
-	if (g_Vars.antiplayernum >= 0
-#ifdef PLATFORM_N64
-			&& chr->prop == g_Vars.anti->prop
-#else
-			&& chr->prop->type == PROPTYPE_PLAYER
-			&& chr->prop != g_Vars.bond->prop
-#endif
-			) {
+	if (g_Vars.antiplayernum >= 0 && PROP_IS_FOR_ANTI_PLAYER(chr->prop)) {
 		return;
 	}
 
@@ -13578,11 +13558,7 @@ void chraTickBg(void)
 
 				if (targetprop && (targetprop->type == PROPTYPE_CHR || targetprop->type == PROPTYPE_PLAYER)) {
 					if ((targetprop->type == PROPTYPE_PLAYER
-#ifdef PLATFORM_N64
-								&& !(g_Vars.antiplayernum >= 0 && g_Vars.anti && g_Vars.anti->prop == targetprop)
-#else
-								&& !(g_Vars.antiplayernum >= 0 && g_Vars.bond && g_Vars.bond->prop != targetprop)
-#endif
+								&& !(g_Vars.antiplayernum >= 0 && g_Vars.anti && PROP_IS_FOR_ANTI_PLAYER(targetprop))
 								&& chrCompareTeams(chr, targetprop->chr, COMPARE_ENEMIES))
 							|| CHRRACE(targetprop->chr) == RACE_EYESPY) {
 						s32 time60;

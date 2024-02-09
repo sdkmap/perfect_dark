@@ -4662,7 +4662,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 				hit->model, hit->hitthing.unk28 / 2, sp90);
 
 		if (g_Vars.antiplayernum >= 0
-				&& g_Vars.currentplayer == g_Vars.anti
+				&& PLAYER_IS_ANTI(g_Vars.currentplayer)
 				&& (chr->hidden & CHRHFLAG_ANTINONINTERACTABLE)) {
 			return;
 		}
