@@ -761,20 +761,23 @@ MenuItemHandlerResult menuhandlerAcceptMission(s32 operation, struct menuitem *i
 
 			setNumPlayers(2);
 #else
+			u32 contmask = joyGetConnectedControllers();
+			u32 plrcount = 0;
+			u32 tmpmask;
+
+			// Count all players
+			tmpmask = contmask;
+			while (tmpmask) {
+				plrcount += (tmpmask & 0x1);
+				tmpmask >>= 1;
+			}
+
 			g_Vars.bondplayernum = g_Vars.pendingantiplayernum ^ 1;
 			g_Vars.antiplayernum = (g_Vars.bondplayernum == 0 ? 1 : 0);
 			g_Vars.coopplayernum = -1;
 
-			if ((joyGetConnectedControllers() & 0xF) == 0xF) {
-				setNumPlayers(4);
-				g_MpSetup.chrslots = 0xF;
-			} else if ((joyGetConnectedControllers() & 0x7) == 0x7) {
-				setNumPlayers(3);
-				g_MpSetup.chrslots = 0x7;
-			} else {
-				setNumPlayers(2);
-				g_MpSetup.chrslots = 0x3;
-			}
+			setNumPlayers(plrcount);
+			g_MpSetup.chrslots = contmask;
 #endif
 		} else {
 			// Solo
@@ -1645,18 +1648,27 @@ MenuItemHandlerResult menuhandlerAntiMainPlayer(s32 operation, struct menuitem *
 	// For consistency with the main save format,
 	// the main player is (pendingantiplayernum XOR 1)
 
+	// g_Vars.(bond|anti|coop)playernum is based on the n'th player slot, not the n'th controller;
+	// that is, it's not based on g_MpSetup.chrslots.
+	// Because of this, it's easier just to change the label.
+
+	u32 tmpmask = joyGetConnectedControllers();
+	u32 plrcount = 0;
+	u32 labelidx = 0;
+	while (tmpmask) {
+		plrcount += (tmpmask & 0x1);
+		if (plrcount <= data->dropdown.value) {
+			labelidx += 1;
+		}
+		tmpmask >>= 1;
+	}
+
 	switch (operation) {
 	case MENUOP_GETOPTIONCOUNT:
-		if ((joyGetConnectedControllers() & 0xF) == 0xF) {
-			data->dropdown.value = 4;
-		} else if ((joyGetConnectedControllers() & 0x7) == 0x7) {
-			data->dropdown.value = 3;
-		} else {
-			data->dropdown.value = 2;
-		}
+		data->dropdown.value = plrcount;
 		break;
 	case MENUOP_GETOPTIONTEXT:
-		return (s32) (labels[data->dropdown.value]);
+		return (s32) (labels[labelidx]);
 	case MENUOP_SET:
 		g_Vars.pendingantiplayernum = data->dropdown.value ^ 1;
 		g_Vars.modifiedfiles |= MODFILE_GAME;
@@ -4959,7 +4971,7 @@ MenuItemHandlerResult menuhandlerMainMenuCooperative(s32 operation, struct menui
 MenuItemHandlerResult menuhandlerMainMenuCounterOperative(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_CHECKDISABLED) {
-		if ((joyGetConnectedControllers() & 2) == 0) {
+		if ((joyGetConnectedControllers() & ~0x1) == 0) {
 			return true;
 		}
 	}

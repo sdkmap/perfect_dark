@@ -259,7 +259,10 @@ void mpReset(void)
 #ifdef PLATFORM_N64
 	if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
 #else
-	if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && getNumPlayers() <= 2)
+	// Counter-Operative now uses a different approach which allows more than 2 players.
+	// Co-Operative, on the other hand, is currently limited to 2 players.
+	// Due to the change in approach, it's better to ignore 2.x controls for Counter-Operative.
+	if (g_Vars.coopplayernum >= 0)
 #endif
 	{
 		struct mpplayerconfig tmp;
