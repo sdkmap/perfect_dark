@@ -396,25 +396,17 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
 
     if (cc_features.opt_blur) {
         // blur filter, used for menu backgrounds
+        // used to be two for loops from 0 to 4, but apparently intel drivers crashed trying to unroll it
+        // used to have a const weight array, but apparently drivers for the GT620 don't like const array initializers
         append_line(fs_buf, &fs_len, R"(
-            const vec4 blurOffsets = vec4(-1.5, -0.5, +0.5, +1.5);
-            const mat4 blurWeights = mat4(
-                0.009947, 0.009641, 0.008778, 0.007509,
-                0.009641, 0.009345, 0.008508, 0.007278,
-                0.008778, 0.008508, 0.007747, 0.006626,
-                0.007509, 0.007278, 0.006626, 0.005668
-            );
-            lowp vec4 hookTexture2D(in sampler2D tex, in vec2 texCoord, in vec2 texSize) {
-                lowp vec4 color = vec4(0.0);
-                lowp float wacc = 0.0;
-                for (int y = 0; y < 4; ++y) {
-                    for (int x = 0; x < 4; ++x) {
-                        vec2 ofs = vec2(blurOffsets[x], blurOffsets[y]) / texSize;
-                        wacc += blurWeights[x][y];
-                        color += texture2D(tex, texCoord + ofs) * blurWeights[x][y];
-                    }
+            lowp vec4 hookTexture2D(in sampler2D t, in vec2 uv, in vec2 tsize) {
+                lowp vec4 cw = vec4(0.0);
+                for (int i = 0; i < 16; ++i) {
+                    vec2 xy = vec2(float(i & 3), float(i >> 2));
+                    lowp float w = 0.009947 - length(xy) * 0.001;
+                    cw += vec4(texture2D(t, uv + (vec2(-1.5) + xy) / tsize).rgb * w, w);
                 }
-                return vec4(color.rgb / wacc, 1.0);
+                return vec4(cw.rgb / cw.a, 1.0);
             })"
         );
     } else if (current_filter_mode == FILTER_THREE_POINT) {
@@ -589,6 +581,7 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
         glGetShaderiv(vertex_shader, GL_INFO_LOG_LENGTH, &max_length);
         char error_log[1024];
         glGetShaderInfoLog(vertex_shader, max_length, &max_length, &error_log[0]);
+        sysLogPrintf(LOG_ERROR, "Failed to compile this vertex shader (ID %llx, %x):\n%s", shader_id0, shader_id1, vs_buf);
         sysFatalError("Vertex shader compilation failed:\n%s", error_log);
     }
 
@@ -601,6 +594,7 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
         glGetShaderiv(fragment_shader, GL_INFO_LOG_LENGTH, &max_length);
         char error_log[1024];
         glGetShaderInfoLog(fragment_shader, max_length, &max_length, &error_log[0]);
+        sysLogPrintf(LOG_ERROR, "Failed to compile this fragment shader (ID %llx, %x):\n%s", shader_id0, shader_id1, fs_buf);
         sysFatalError("Fragment shader compilation failed:\n%s", error_log);
     }
 
