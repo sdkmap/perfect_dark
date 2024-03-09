@@ -72,6 +72,7 @@
 #include "lib/str.h"
 #include "data.h"
 #include "types.h"
+#include "system.h"
 #include "console.h"
 #include "net/net.h"
 #include "net/netmsg.h"
@@ -504,6 +505,9 @@ void mainLoop(void)
 				schedStartFrame(&g_Sched);
 				mainTick();
 				schedEndFrame(&g_Sched);
+			}
+			if (g_TickExtraSleep) {
+				sysSleep(EXTRA_SLEEP_TIME);
 			}
 		}
 
