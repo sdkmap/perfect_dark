@@ -4723,6 +4723,8 @@ enum weaponnum {
 #define CROSSHAIR_HEALTH_ON_GREEN 1
 #define CROSSHAIR_HEALTH_ON_WHITE 2
 
+#define EXTRA_SLEEP_TIME 1000LL // 100us
+
 #endif
 
 #endif

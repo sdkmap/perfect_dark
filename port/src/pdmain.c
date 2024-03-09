@@ -73,6 +73,7 @@
 #include "data.h"
 #include "types.h"
 #include "debugger.h"
+#include "system.h"
 
 extern u8 *g_MempHeap;
 extern u32 g_MempHeapSize;
@@ -499,6 +500,9 @@ void mainLoop(void)
 				schedStartFrame(&g_Sched);
 				mainTick();
 				schedEndFrame(&g_Sched);
+			}
+			if (g_TickExtraSleep) {
+				sysSleep(EXTRA_SLEEP_TIME);
 			}
 		}
 
