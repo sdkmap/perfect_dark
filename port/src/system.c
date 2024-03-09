@@ -24,6 +24,10 @@ static CREATEWAITABLETIMEREXAFN pfnCreateWaitableTimerExA;
 
 #else
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE 1
+#endif
+
 #include <unistd.h>
 
 // figure out how to yield
@@ -293,7 +297,7 @@ void sysSleep(const s64 hns)
 	SetWaitableTimer(timer, &li, 0, NULL, NULL, FALSE);
 	WaitForSingleObject(timer, INFINITE);
 #else
-	const timespec spec = { 0, hns * 100 };
+	const struct timespec spec = { 0, hns * 100 };
 	nanosleep(&spec, NULL);
 #endif
 }
