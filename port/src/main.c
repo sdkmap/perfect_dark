@@ -16,6 +16,7 @@
 #include "config.h"
 #include "mod.h"
 #include "system.h"
+#include "debugger.h"
 #include "utils.h"
 
 u32 g_OsMemSize = 0;
