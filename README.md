@@ -103,24 +103,32 @@ Controls can be rebound in `pd.ini`. Default control scheme is as follows:
 
 1. Install [MSYS2](https://www.msys2.org).
 2. Open the `MINGW32` prompt. (**NOTE:** _not_ the `MSYS` prompt or the `MINGW64` prompt)
-3. Install dependencies: `pacman -S mingw-w64-i686-toolchain mingw-w64-i686-SDL2 mingw-w64-i686-zlib make git`
-4. Run `make -f Makefile.port` in the `perfect_dark` directory.
-5. The resulting executable will be at `build/ntsc-final-port/pd.exe`.
+3. Install dependencies:  
+   `pacman -S mingw-w64-i686-toolchain mingw-w64-i686-SDL2 mingw-w64-i686-zlib make git`
+4. Get the source code:  
+   `git clone --recursive https://github.com/fgsfdsfgs/perfect_dark.git && cd perfect_dark`
+5. Run `make -f Makefile.port`.
+   * Add ` ROMID=pal-final` or ` ROMID=jpn-final` at the end of the command if you want to build a PAL or JPN executable respectively.
+6. The resulting executable will be at `build/ntsc-final-port/pd.exe`.
+7. If you don't know where you downloaded the source to, you can run `explorer .` to open the current directory.
 
 ### Linux
 
 1. Ensure you have gcc, g++ (version 10.0+) and 32-bit versions of SDL2 (version 2.0.12+), libGL and ZLib installed on your system.
    * On a 64-bit system you also need to have `gcc-multilib` and `g++-multilib` (or your distro's analogues) installed.
-2. Run the following command in the `perfect_dark` directory:
+2. Get the source code:  
+   `git clone --recursive https://github.com/fgsfdsfgs/perfect_dark.git && cd perfect_dark`
+3. Run the following command:
    * On a 64-bit system: ```make -f Makefile.port TARGET_PLATFORM=i686-linux```
    * On a 32-bit system: ```make -f Makefile.port```
-3. The resulting executable will be at `build/ntsc-final-port/pd.exe`.  
+   * Add ` ROMID=pal-final` or ` ROMID=jpn-final` at the end of the command if you want to build a PAL or JPN executable respectively.
+4. The resulting executable will be at `build/ntsc-final-port/pd.exe`.  
 
 Currently only `i686-linux` and `i686-windows` are supported, using `gcc -m32` and `i686-w64-mingw32-gcc` as compilers, respectively.  
 Alternate compilers can be specified by passing `TOOLCHAIN=i686-whatever-` as a command line argument.
 
 You can build an executable with PAL or JPN ROM support by adding `ROMID=pal-final` or `ROMID=jpn-final` to the `make` command.  
-You will need to provide a `jpn-final` or `pal-final` ROM for those, named `pd.jpn-final.z64` or `pd.pal-final.z64`.
+You will need to provide a `jpn-final` or `pal-final` ROM to run those, named `pd.jpn-final.z64` or `pd.pal-final.z64`.
 
 It might be possible to build a 32-bit ARM executable, but this has not been tested.
 
