@@ -272,7 +272,7 @@ export ROMID
 
 BIN := $(B_DIR)/$(BIN_NAME)
 
-default: $(JSON_HEADERS) $(BIN)
+default: $(BIN)
 
 ################################################################################
 # Asset Manager header generation
@@ -310,11 +310,11 @@ ifneq ($(CV2PDB),)
 	$(CV2PDB) $(BIN)
 endif
 
-$(B_DIR)/%.o: %.c
+$(B_DIR)/%.o: %.c $(JSON_HEADERS)
 	@mkdir -p $(dir $@)
 	$(CC) -c $(CFLAGS) $(OPT_LVL) -o $@ $<
 
-$(B_DIR)/%.o: %.cpp
+$(B_DIR)/%.o: %.cpp $(JSON_HEADERS)
 	@mkdir -p $(dir $@)
 	$(CXX) -c $(CXXFLAGS) $(OPT_LVL) -o $@ $<
 
