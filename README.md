@@ -106,7 +106,7 @@ Controls can be rebound in `pd.ini`. Default control scheme is as follows:
 3. Install dependencies:  
    `pacman -S mingw-w64-i686-toolchain mingw-w64-i686-SDL2 mingw-w64-i686-zlib make git`
 4. Get the source code:  
-   `git clone --recursive https://github.com/fgsfdsfgs/perfect_dark.git && cd perfect_dark`
+   `git clone -b port-net --recursive https://github.com/fgsfdsfgs/perfect_dark.git && cd perfect_dark`
 5. Run `make -f Makefile.port`.
    * Add ` ROMID=pal-final` or ` ROMID=jpn-final` at the end of the command if you want to build a PAL or JPN executable respectively.
 6. The resulting executable will be at `build/ntsc-final-port/pd.exe`.
@@ -117,7 +117,7 @@ Controls can be rebound in `pd.ini`. Default control scheme is as follows:
 1. Ensure you have gcc, g++ (version 10.0+) and 32-bit versions of SDL2 (version 2.0.12+), libGL and ZLib installed on your system.
    * On a 64-bit system you also need to have `gcc-multilib` and `g++-multilib` (or your distro's analogues) installed.
 2. Get the source code:  
-   `git clone --recursive https://github.com/fgsfdsfgs/perfect_dark.git && cd perfect_dark`
+   `git clone -b port-net --recursive https://github.com/fgsfdsfgs/perfect_dark.git && cd perfect_dark`
 3. Run the following command:
    * On a 64-bit system: ```make -f Makefile.port TARGET_PLATFORM=i686-linux```
    * On a 32-bit system: ```make -f Makefile.port```
