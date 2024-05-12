@@ -1539,14 +1539,8 @@ static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bo
                         if (rdp.other_mode_h & G_TL_LOD) {
                             // HACK: very roughly eyeballed based on the carpets in Defection
                             // this is actually supposed to be calculated per pixel
-                            float distance_frac = (w - 256.0f) / 512.0f;
-                            if (distance_frac < 0.5f) {
-                                distance_frac = 0.5f;
-                            }
-                            if (distance_frac > 1.0f) {
-                                distance_frac = 1.0f;
-                            }
-                            tmp.r = tmp.g = tmp.b = tmp.a = distance_frac * 255.0f;
+                            const float distance_frac = std::max(0.f, std::min(w / 1024.f, 1.f));
+                            tmp.r = tmp.g = tmp.b = tmp.a = (0.65f + distance_frac * 0.35f) * 255.f;
                         } else {
                             tmp.r = tmp.g = tmp.b = tmp.a = 255;
                         }
@@ -1967,7 +1961,6 @@ static void gfx_dp_set_env_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 
 static void gfx_dp_set_prim_color(uint8_t m, uint8_t l, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
     rdp.prim_lod_fraction = l;
-    rdp.tex_min_lod = m;
     rdp.prim_color.r = r;
     rdp.prim_color.g = g;
     rdp.prim_color.b = b;
@@ -1976,6 +1969,8 @@ static void gfx_dp_set_prim_color(uint8_t m, uint8_t l, uint8_t r, uint8_t g, ui
     rdp.fill_color.g = g;
     rdp.fill_color.b = b;
     rdp.fill_color.a = a;
+    rdp.tex_min_lod = m;
+
 }
 
 static void gfx_dp_set_fog_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
