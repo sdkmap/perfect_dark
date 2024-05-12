@@ -4595,20 +4595,12 @@ Gfx *playerRenderHud(Gfx *gdl)
 				&& ((g_Vars.currentplayer->devicesactive & ~g_Vars.currentplayer->devicesinhibit) & DEVICE_NIGHTVISION)) {
 			gdl = bviewDrawNvLens(gdl);
 			gdl = bviewDrawNvBinoculars(gdl);
-#ifndef PLATFORM_N64
-			// turn off "greenscale"
-			gDPGrayscaleEXT(gdl++, G_OFF);
-#endif
 		} else if (g_Vars.currentplayer->isdead == false
 				&& g_InCutscene == 0
 				&& (!g_Vars.currentplayer->eyespy || (g_Vars.currentplayer->eyespy && !g_Vars.currentplayer->eyespy->active))
 				&& ((g_Vars.currentplayer->devicesactive & ~g_Vars.currentplayer->devicesinhibit) & DEVICE_IRSCANNER)) {
 			gdl = bviewDrawIrLens(gdl);
 			gdl = bviewDrawIrBinoculars(gdl);
-#ifndef PLATFORM_N64
-			// turn off "redscale"
-			gDPGrayscaleEXT(gdl++, G_OFF);
-#endif
 		}
 
 		if (g_Vars.currentplayer->eyesshutfrac > 0) {

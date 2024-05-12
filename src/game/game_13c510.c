@@ -168,11 +168,6 @@ void artifactsCalculateGlaresForRoom(s32 roomnum)
 	struct coord *campos = &g_Vars.currentplayer->cam_pos;
 	struct artifact *artifact;
 
-#ifndef PLATFORM_N64
-	const bool prevperim = g_Vars.currentplayer->bondperimenabled;
-	playerSetPerimEnabled(g_Vars.currentplayer->prop, false);
-#endif
-
 	if (g_Rooms[roomnum].gfxdata != NULL && g_Rooms[roomnum].loaded240) {
 		numlights = g_Rooms[roomnum].gfxdata->numlights;
 
@@ -378,10 +373,6 @@ void artifactsCalculateGlaresForRoom(s32 roomnum)
 			}
 		}
 	}
-
-#ifndef PLATFORM_N64
-	playerSetPerimEnabled(g_Vars.currentplayer->prop, prevperim);
-#endif
 }
 
 u8 func0f13d3c4(u8 arg0, u8 arg1)
