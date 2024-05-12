@@ -1199,7 +1199,11 @@ Gfx *lvRender(Gfx *gdl)
 				autoaimTick();
 				handsTickAttack();
 
+#ifndef PLATFORM_N64
+				// glares calculated earlier on PC, before prop matrices turn into garbage
+				bgCalculateGlaresForVisibleRooms();
 				debuggerUpdatePropInfo(false);
+#endif
 
 				// Calculate lookingatprop
 				if (PLAYERCOUNT() == 1
