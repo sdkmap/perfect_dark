@@ -6407,12 +6407,16 @@ end:
 void bgCalculateGlaresForVisibleRooms(void)
 {
 	s32 i;
+
 	g_NumRoomsWithGlares = 0;
-	for (i = 1; i < g_Vars.roomcount; i++) {
-		if (g_Rooms[i].flags & ROOMFLAG_ONSCREEN) {
-			artifactsCalculateGlaresForRoom(i);
-			if (g_NumRoomsWithGlares < 100) {
-				g_GlareRooms[g_NumRoomsWithGlares++] = i;
+
+	if (!g_Vars.mplayerisrunning) {
+		for (i = 1; i < g_Vars.roomcount; i++) {
+			if (g_Rooms[i].flags & ROOMFLAG_ONSCREEN) {
+				artifactsCalculateGlaresForRoom(i);
+				if (g_NumRoomsWithGlares < 100) {
+					g_GlareRooms[g_NumRoomsWithGlares++] = i;
+				}
 			}
 		}
 	}
