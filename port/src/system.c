@@ -1,3 +1,7 @@
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE 1
+#endif
+
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -28,10 +32,6 @@ __attribute__((dllexport)) u32 NvOptimusEnablement = 1;
 __attribute__((dllexport)) u32 AmdPowerXpressRequestHighPerformance = 1;
 
 #else
-
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE 1
-#endif
 
 #include <unistd.h>
 
