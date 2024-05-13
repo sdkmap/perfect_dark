@@ -21,7 +21,9 @@ static s32 vidWidth = 640;
 static s32 vidHeight = 480;
 static s32 vidFramebuffers = true;
 static s32 vidFullscreen = false;
+static s32 vidFullscreenExclusive = false;
 static s32 vidMaximize = false;
+static s32 vidAllowHiDpi = false;
 static s32 vidVsync = 1;
 static s32 vidMSAA = 1;
 static s32 vidFramerateLimit = 0;
@@ -45,7 +47,23 @@ s32 videoInit(void)
 	gfx_framebuffers_enabled = (bool)vidFramebuffers;
 	gfx_msaa_level = vidMSAA;
 
-	gfx_init(wmAPI, renderingAPI, "PD", vidFullscreen, vidMaximize, vidWidth, vidHeight, 100, 100);
+	struct GfxInitSettings set = {
+		.wapi = wmAPI,
+		.rapi = renderingAPI,
+		.window_settings = {
+			.title = "Perfect Dark",
+			.width = vidWidth,
+			.height = vidHeight,
+			.x = 100,
+			.y = 100,
+			.fullscreen = vidFullscreen,
+			.fullscreen_is_exclusive = vidFullscreenExclusive,
+			.maximized = vidMaximize,
+			.allow_hidpi = vidAllowHiDpi
+		}
+	};
+
+	gfx_init(&set);
 
 	if (!wmAPI->set_swap_interval(vidVsync)) {
 		vidVsync = 0;
@@ -249,6 +267,8 @@ PD_CONSTRUCTOR static void videoConfigInit(void)
 	configRegisterInt("Video.DefaultMaximize", &vidMaximize, 0, 1);
 	configRegisterInt("Video.DefaultWidth", &vidWidth, 0, 32767);
 	configRegisterInt("Video.DefaultHeight", &vidHeight, 0, 32767);
+	configRegisterInt("Video.ExclusiveFullscreen", &vidFullscreenExclusive, 0, 1);
+	configRegisterInt("Video.AllowHiDpi", &vidAllowHiDpi, 0, 1);
 	configRegisterInt("Video.VSync", &vidVsync, -1, 10);
 	configRegisterInt("Video.FramebufferEffects", &vidFramebuffers, 0, 1);
 	configRegisterInt("Video.FramerateLimit", &vidFramerateLimit, 0, VIDEO_MAX_FPS);

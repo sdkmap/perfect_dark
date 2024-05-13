@@ -2520,16 +2520,15 @@ extern "C" void gfx_get_dimensions(uint32_t* width, uint32_t* height, int32_t* p
     gfx_wapi->get_dimensions(width, height, posX, posY);
 }
 
-extern "C" void gfx_init(struct GfxWindowManagerAPI* wapi, struct GfxRenderingAPI* rapi, const char* game_name,
-              bool start_in_fullscreen, bool start_maximized, uint32_t width, uint32_t height, uint32_t posX, uint32_t posY) {
-    gfx_wapi = wapi;
-    gfx_rapi = rapi;
-    gfx_wapi->init(game_name, rapi->get_name(), start_in_fullscreen, start_maximized, width, height, posX, posY);
+extern "C" void gfx_init(const GfxInitSettings *settings) {
+    gfx_wapi = settings->wapi;
+    gfx_rapi = settings->rapi;
+    gfx_wapi->init(&settings->window_settings);
     gfx_rapi->init();
-    gfx_rapi->update_framebuffer_parameters(0, width, height, 1, false, true, true, true);
+    gfx_rapi->update_framebuffer_parameters(0, settings->window_settings.width, settings->window_settings.height, 1, false, true, true, true);
     gfx_current_dimensions.internal_mul = 1;
-    gfx_current_game_window_viewport.width = gfx_current_dimensions.width = width;
-    gfx_current_game_window_viewport.height = gfx_current_dimensions.height = height;
+    gfx_current_game_window_viewport.width = gfx_current_dimensions.width = settings->window_settings.width;
+    gfx_current_game_window_viewport.height = gfx_current_dimensions.height = settings->window_settings.height;
     game_framebuffer = gfx_rapi->create_framebuffer();
     game_framebuffer_msaa_resolved = gfx_rapi->create_framebuffer();
 
