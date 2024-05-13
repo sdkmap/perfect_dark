@@ -32,6 +32,10 @@
 
 #include "os_pfs.h"
 
+#ifndef PLATFORM_N64
+#include <stdio.h>
+#endif
+
 #ifdef _LANGUAGE_C_PLUS_PLUS
 extern "C" {
 #endif
