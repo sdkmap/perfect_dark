@@ -1540,7 +1540,7 @@ static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bo
                             // HACK: very roughly eyeballed based on the carpets in Defection
                             // this is actually supposed to be calculated per pixel
                             const float distance_frac = std::max(0.f, std::min(w / 1024.f, 1.f));
-                            tmp.r = tmp.g = tmp.b = tmp.a = (0.65f + distance_frac * 0.35f) * 255.f;
+                            tmp.r = tmp.g = tmp.b = tmp.a = (0.7f + distance_frac * 0.3f) * 255.f;
                         } else {
                             tmp.r = tmp.g = tmp.b = tmp.a = 255;
                         }

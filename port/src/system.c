@@ -22,6 +22,10 @@ static CREATEWAITABLETIMEREXAFN pfnCreateWaitableTimerExA;
 // winapi also provides a yield macro
 #define DO_YIELD() YieldProcessor()
 
+// ask system for high performance GPU, if any
+__attribute__((dllexport)) u32 NvOptimusEnablement = 1;
+__attribute__((dllexport)) u32 AmdPowerXpressRequestHighPerformance = 1;
+
 #else
 
 #ifndef _GNU_SOURCE
