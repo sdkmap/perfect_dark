@@ -73,6 +73,14 @@ struct menuitem g_PacOptionsMenuItems[] = {
 		MPOPTION_NODRUGBLUR,
 		menuhandlerMpCheckboxOption,
 	},
+	{
+		MENUITEMTYPE_CHECKBOX,
+		0,
+		MENUITEMFLAG_LOCKABLEMINOR,
+		L_OPTIONS_257, // "Friendly Fire"
+		MPOPTION_FRIENDLYFIRE,
+		menuhandlerMpDisplayTeam,
+	},
 #endif
 	{
 		MENUITEMTYPE_CHECKBOX,
