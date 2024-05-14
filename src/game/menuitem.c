@@ -732,9 +732,15 @@ bool menuitemListTick(struct menuitem *item, struct menuinputs *inputs, u32 tick
 				data->list.targetoffsety = menuitemListGetOffsetY(data->list.index, item);
 			}
 
+#ifdef PLATFORM_N64
 			if (inputs->updown) {
 				prev2 = data->list.index;
 				data->list.index += inputs->updown;
+#else
+			if (inputs->updown || inputs->mousescroll) {
+				prev2 = data->list.index;
+				data->list.index += inputs->updown + inputs->mousescroll;
+#endif
 
 				if (data->list.index < 0) {
 					data->list.index = handlerdata.list.value - 1;
