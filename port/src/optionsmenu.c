@@ -132,6 +132,22 @@ static MenuItemHandlerResult menuhandlerMouseDefaultLocked(s32 operation, struct
 	return 0;
 }
 
+static MenuItemHandlerResult menuhandlerMenuMouseControl(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	switch (operation) {
+	case MENUOP_GET:
+		return g_MenuMouseControl;
+	case MENUOP_SET:
+		g_MenuMouseControl = data->checkbox.value;
+		if (!g_MenuMouseControl) {
+			g_MenuUsingMouse = false;
+		}
+		break;
+	}
+
+	return 0;
+}
+
 static MenuItemHandlerResult menuhandlerMouseSpeedX(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	f32 x, y;
@@ -264,6 +280,14 @@ struct menuitem g_ExtendedMouseMenuItems[] = {
 		(uintptr_t)"Grab Mouse Input by Default",
 		0,
 		menuhandlerMouseDefaultLocked,
+	},
+	{
+		MENUITEMTYPE_CHECKBOX,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Mouse Menu Navigation",
+		0,
+		menuhandlerMenuMouseControl,
 	},
 	{
 		MENUITEMTYPE_SEPARATOR,
