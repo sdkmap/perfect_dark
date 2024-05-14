@@ -3739,6 +3739,9 @@ struct menudialog {
 	/*0x6c*/ u8 unk6c;
 	/*0x6d*/ s8 swipedir;
 	/*0x6e*/ u8 unk6e;
+#ifndef PLATFORM_N64
+	/*0x6f*/ u8 usingmouse;
+#endif
 };
 
 struct menudfc {
@@ -4991,6 +4994,12 @@ struct menuinputs {
 	/*0x0c*/ s32 unk0c;
 	/*0x10*/ s32 unk10;
 	/*0x14*/ u8 unk14;
+#ifndef PLATFORM_N64
+	/*0x15*/ u8 mousemoved;
+	/*0x16*/ s8 mousescroll;
+	/*0x18*/ s32 mousex;
+	/*0x1c*/ s32 mousey;
+#endif
 };
 
 struct mpconfigsim {
