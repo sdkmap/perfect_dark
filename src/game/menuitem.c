@@ -2454,6 +2454,34 @@ bool menuitemSliderTick(struct menuitem *item, struct menudialog *dialog, struct
 	f32 f14;
 
 	if ((tickflags & MENUTICKFLAG_ITEMISFOCUSED)) {
+#ifndef PLATFORM_N64
+		if (g_MenuUsingMouse && inputs->select) {
+			// handle mouse
+			struct menudialog *dialog = g_Menus[g_MpPlayerNum].curdialog;
+			if (dialog) {
+				const s32 left = dialog->x + dialog->width - 82;
+				const s32 right = dialog->x + dialog->width - 7;
+				const s32 size = right - left;
+				const s32 delta = inputs->mousex - left;
+				if (delta >= -8 && delta <= size + 8) {
+					index = (delta / (f32)size) * item->param3;
+					if (index < 0) {
+						index = 0;
+					}
+					if (index > item->param3) {
+						index = item->param3;
+					}
+					if (item->handler) {
+						item->handler(MENUOP_GET, item, &handlerdata);
+						handlerdata.slider.value = index;
+						item->handler(MENUOP_SET, item, &handlerdata);
+					}
+					return true;
+				}
+			}
+		}
+#endif
+
 		if (tickflags & MENUTICKFLAG_DIALOGISDIMMED) {
 			if (item->handler) {
 				item->handler(MENUOP_GETSLIDER, item, &handlerdata);
