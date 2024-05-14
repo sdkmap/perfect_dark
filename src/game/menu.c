@@ -4745,7 +4745,7 @@ void menuProcessInput(void)
 			}
 
 			// don't back out on weapon back when using mouse because it's likely bound to wheel
-			if (!g_MenuUsingMouse && (buttonsnow & BUTTON_WPNBACK)) {
+			if (!g_MenuMouseControl && (buttonsnow & BUTTON_WPNBACK)) {
 				inputs.back = 1;
 			}
 #endif
