@@ -1366,6 +1366,34 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 		s16 prevcol = kb->col;
 		s16 prevrow = kb->row;
 
+#ifndef PLATFORM_N64
+		// handle mouse
+		struct menudialog *dialog = g_Menus[g_MpPlayerNum].curdialog;
+		if (dialog && dialog->usingmouse && !inputs->leftright && !inputs->updown) {
+			const s32 dleft = dialog->x + 4;
+			const s32 dright = dleft + 12 * 10;
+			const s32 dtop = dialog->y + 13 + 12;
+			const s32 dbottom = dtop + 11 * 5;
+			const s32 mx = inputs->mousex;
+			const s32 my = inputs->mousey;
+			if (mx > dleft && mx < dright && my > dtop && my < dbottom) {
+				kb->row = (my - dtop) / 11;
+				kb->col = (mx - dleft) / 12;
+				if (kb->row == 4) {
+					if (kb->col < 2) {
+						kb->col = 0;
+					} else if (kb->col < 5) {
+						kb->col = 2;
+					} else if (kb->col < 8) {
+						kb->col = 5;
+					} else {
+						kb->col = 8;
+					}
+				}
+			}
+		}
+#endif
+
 		// Handle left/right movement
 		// In most cases the loop only runs once, but on row 4 the buttons span
 		// across multiple columns so the loop will run again until the column

@@ -1362,8 +1362,8 @@ bool dialogChangeItemFocusWithMouse(struct menudialog *dialog, s32 mx, s32 my)
 	s32 curx, cury;
 	s32 colwidth = 0;
 
-	// only allow mouse control of player 1 menus
-	if (menu->playernum != 0) {
+	// only allow mouse control of player 1 menus; ignore mouse if navigating with keyboard
+	if (menu->playernum != 0 || !dialog->usingmouse) {
 		return false;
 	}
 
