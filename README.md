@@ -50,9 +50,10 @@ though you might have to install some additional libraries.
 
 ## Download
 
-Latest [automatic builds](https://github.com/fgsfdsfgs/perfect_dark/releases/tag/ci-dev-build-net) of the netplay branch for supported platforms:
-* [i686-windows (`port-net`)](https://github.com/fgsfdsfgs/perfect_dark/releases/download/ci-dev-build-net/pd-net-i686-windows.zip)
-* [i686-linux (`port-net`)](https://github.com/fgsfdsfgs/perfect_dark/releases/download/ci-dev-build-net/pd-net-i686-linux.zip)
+Latest [automatic builds](https://github.com/fgsfdsfgs/perfect_dark/actions) of the netplay branch for supported platforms:
+* [i686-windows (`port-net`)](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port-net/pd-i686-windows.zip)
+* [i686-linux (`port-net`)](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port-net/pd-i686-linux.zip)
+
 If you are looking for regular builds (the `port` branch), see [this link](https://github.com/fgsfdsfgs/perfect_dark/blob/port/README.md#download).
 
 ## Running
