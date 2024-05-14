@@ -30,6 +30,7 @@ static s32 vidFramerateLimit = 0;
 
 static s32 texFilter = FILTER_LINEAR;
 static s32 texFilter2D = true;
+static s32 texDetail = true;
 
 static u32 dlcount = 0;
 static u32 frames = 0;
@@ -45,6 +46,7 @@ s32 videoInit(void)
 	gfx_current_native_viewport.height = 220;
 	gfx_current_native_aspect = 320.f / 220.f;
 	gfx_framebuffers_enabled = (bool)vidFramebuffers;
+	gfx_detail_textures_enabled = (bool)texDetail;
 	gfx_msaa_level = vidMSAA;
 
 	struct GfxInitSettings set = {
@@ -176,7 +178,7 @@ f32 videoGetAspect(void)
 	return gfx_current_dimensions.aspect_ratio;
 }
 
-u32 videoGetTextureFilter2D(void)
+s32 videoGetTextureFilter2D(void)
 {
 	return texFilter2D;
 }
@@ -184,6 +186,11 @@ u32 videoGetTextureFilter2D(void)
 u32 videoGetTextureFilter(void)
 {
 	return texFilter;
+}
+
+s32 videoGetDetailTextures(void)
+{
+	return texDetail;
 }
 
 void videoSetWindowOffset(s32 x, s32 y)
@@ -215,9 +222,15 @@ void videoSetTextureFilter(u32 filter)
 	renderingAPI->set_texture_filter((enum FilteringMode)filter);
 }
 
-void videoSetTextureFilter2D(u32 filter)
+void videoSetTextureFilter2D(s32 filter)
 {
 	texFilter2D = !!filter;
+}
+
+void videoSetDetailTextures(s32 detail)
+{
+	texDetail = !!detail;
+	gfx_detail_textures_enabled = (bool)texDetail;
 }
 
 void videoCapFramerate(s32 limit)
@@ -283,4 +296,5 @@ PD_CONSTRUCTOR static void videoConfigInit(void)
 	configRegisterInt("Video.MSAA", &vidMSAA, 1, 16);
 	configRegisterInt("Video.TextureFilter", &texFilter, 0, 2);
 	configRegisterInt("Video.TextureFilter2D", &texFilter2D, 0, 1);
+	configRegisterInt("Video.DetailTextures", &texDetail, 0, 1);
 }
