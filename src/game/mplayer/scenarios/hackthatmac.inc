@@ -63,8 +63,16 @@ struct menuitem g_HtmOptionsMenuItems[] = {
 		MENUITEMTYPE_CHECKBOX,
 		0,
 		MENUITEMFLAG_LOCKABLEMINOR | MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"Spawn With Weapon",
+		(uintptr_t)"Spawn With Gun",
 		MPOPTION_SPAWNWITHWEAPON,
+		menuhandlerMpCheckboxOption,
+	},
+	{
+		MENUITEMTYPE_CHECKBOX,
+		0,
+		MENUITEMFLAG_LOCKABLEMINOR | MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"No Drug Blur",
+		MPOPTION_NODRUGBLUR,
 		menuhandlerMpCheckboxOption,
 	},
 #endif
