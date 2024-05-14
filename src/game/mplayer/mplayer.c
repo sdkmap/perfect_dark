@@ -538,6 +538,10 @@ void mpInit(void)
 		| MPOPTION_PAC_HIGHLIGHTTARGET
 		| MPOPTION_PAC_SHOWONRADAR;
 
+#ifndef PLATFORM_N64
+	g_MpSetup.options |= MPOPTION_FRIENDLYFIRE;
+#endif
+
 	g_Vars.mphilltime = 10;
 
 	func0f187fec();
