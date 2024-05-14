@@ -60,9 +60,13 @@ If you are looking for regular builds (the `port` branch), see [this link](https
 
 You must already have a Perfect Dark ROM to run the game, as specified above.  
 
-1. Create a directory named `data` next to `pd.exe`.
-2. Put your Perfect Dark ROM named `pd.ntsc-final.z64` into it.
+1. Create a directory named `data` next to `pd.exe` if it's not there.
+2. Put your Perfect Dark NTSC ROM named `pd.ntsc-final.z64` into it.
 3. Run `pd.exe`.
+
+If you want to use a PAL or JPN ROM instead, put them into the `data` directory and run the appropriate executable:
+* PAL: ROM name `pd.pal-final.z64`, EXE name `pd.pal.exe`.
+* JPN: ROM name `pd.jpn-final.z64`, EXE name `pd.jpn.exe`.
 
 Additional information can be found in the [wiki](https://github.com/fgsfdsfgs/perfect_dark/wiki).
 
