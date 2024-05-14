@@ -216,6 +216,7 @@ struct XYWidthHeight gfx_current_game_window_viewport;
 struct XYWidthHeight gfx_current_native_viewport;
 float gfx_current_native_aspect = 4.f / 3.f;
 bool gfx_framebuffers_enabled = true;
+bool gfx_detail_textures_enabled = true;
 
 static bool game_renders_to_framebuffer;
 static int game_framebuffer;
@@ -1185,6 +1186,12 @@ static void gfx_sp_modify_vertex(uint16_t vtx_idx, uint8_t where, uint32_t val) 
     v->v = t;
 }
 
+static inline int gfx_lod_tile_offset(const int i) {
+    if (gfx_detail_textures_enabled)
+        return ((rdp.tex_lod && !rdp.tex_detail) ? 0 : i);
+    return (rdp.tex_lod ? rdp.tex_detail : i);
+}
+
 static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bool is_rect) {
     struct LoadedVertex* v1 = &rsp.loaded_vertices[vtx1_idx];
     struct LoadedVertex* v2 = &rsp.loaded_vertices[vtx2_idx];
@@ -1329,7 +1336,7 @@ static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bo
 
     for (int i = 0; i < 2; i++) {
         // TODO: fix this; for now just ignore smaller mips
-        const uint32_t tile = rdp.first_tile_index + ((rdp.tex_lod && !rdp.tex_detail) ? 0 : i);
+        const uint32_t tile = rdp.first_tile_index + gfx_lod_tile_offset(i);
         if (comb->used_textures[i]) {
             if (rdp.textures_changed[i]) {
                 gfx_flush();
@@ -1434,7 +1441,7 @@ static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bo
             }
 
             // TODO: fix this; for now just ignore smaller mips
-            const uint32_t tile = ((rdp.tex_lod && !rdp.tex_detail) ? 0 : t);
+            const uint32_t tile = gfx_lod_tile_offset(t);
 
             float u = v_arr[i]->u / 32.0f;
             float v = v_arr[i]->v / 32.0f;

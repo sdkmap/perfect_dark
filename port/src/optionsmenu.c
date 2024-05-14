@@ -678,6 +678,19 @@ static MenuItemHandlerResult menuhandlerTexFilter(s32 operation, struct menuitem
 	return 0;
 }
 
+static MenuItemHandlerResult menuhandlerTexDetail(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	switch (operation) {
+	case MENUOP_GET:
+		return (videoGetDetailTextures() != 0);
+	case MENUOP_SET:
+		videoSetDetailTextures(data->checkbox.value);
+		break;
+	}
+
+	return 0;
+}
+
 static MenuItemHandlerResult menuhandlerTexFilter2D(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
@@ -768,6 +781,14 @@ struct menuitem g_ExtendedVideoMenuItems[] = {
 		(uintptr_t)"Maximize Window",
 		0,
 		menuhandlerMaximizeWindow,
+	},
+	{
+		MENUITEMTYPE_CHECKBOX,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Detail Textures",
+		0,
+		menuhandlerTexDetail,
 	},
 	{
 		MENUITEMTYPE_CHECKBOX,
