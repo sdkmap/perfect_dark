@@ -1369,7 +1369,7 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 #ifndef PLATFORM_N64
 		// handle mouse
 		struct menudialog *dialog = g_Menus[g_MpPlayerNum].curdialog;
-		if (dialog && dialog->usingmouse && !inputs->leftright && !inputs->updown) {
+		if (dialog && g_MenuUsingMouse && !inputs->leftright && !inputs->updown) {
 			const s32 dleft = dialog->x + 4;
 			const s32 dright = dleft + 12 * 10;
 			const s32 dtop = dialog->y + 13 + 12;

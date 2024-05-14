@@ -140,6 +140,7 @@ s32 g_MpPlayerNum = 0;
 
 #ifndef PLATFORM_N64
 s32 g_MenuMouseControl = true;
+s32 g_MenuUsingMouse = false;
 #endif
 
 void menuPlaySound(s32 menusound)
@@ -1363,7 +1364,7 @@ bool dialogChangeItemFocusWithMouse(struct menudialog *dialog, s32 mx, s32 my)
 	s32 colwidth = 0;
 
 	// only allow mouse control of player 1 menus; ignore mouse if navigating with keyboard
-	if (menu->playernum != 0 || !dialog->usingmouse) {
+	if (menu->playernum != 0 || !g_MenuUsingMouse) {
 		return false;
 	}
 
@@ -1502,10 +1503,6 @@ void menuOpenDialog(struct menudialogdef *dialogdef, struct menudialog *dialog, 
 	dialog->y = dialog->dsty;
 	dialog->width = dialog->dstwidth;
 	dialog->height = dialog->dstheight;
-
-#ifndef PLATFORM_N64
-	dialog->usingmouse = false;
-#endif
 }
 
 void menuPushDialog(struct menudialogdef *dialogdef)
@@ -4509,7 +4506,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 
 		if ((dialog->focuseditem->flags & MENUITEMFLAG_00010000) == 0) {
 #ifndef PLATFORM_N64
-			if (dialog->usingmouse) {
+			if (g_MenuUsingMouse) {
 				dstscroll = dialog->dstscroll - inputs->mousescroll * LINEHEIGHT;
 			} else
 #endif
@@ -4681,7 +4678,7 @@ void menuProcessInput(void)
 			inputs.mousex = (f32)(SCREEN_WIDTH_LO / 2) + cx;
 		}
 		if (dialog && inputs.mousemoved) {
-			dialog->usingmouse = true;
+			g_MenuUsingMouse = true;
 		}
 	}
 #endif
@@ -4748,7 +4745,7 @@ void menuProcessInput(void)
 			}
 
 			// don't back out on weapon back when using mouse because it's likely bound to wheel
-			if (!dialog->usingmouse && (buttonsnow & BUTTON_WPNBACK)) {
+			if (!g_MenuUsingMouse && (buttonsnow & BUTTON_WPNBACK)) {
 				inputs.back = 1;
 			}
 #endif
@@ -5094,10 +5091,10 @@ void menuProcessInput(void)
 #ifndef PLATFORM_N64
 		// if we haven't been using the mouse but we have been keyboard scrolling disable the mouse
 		if (!inputs.mousemoved && (inputs.leftright || inputs.updown || inputs.leftrightheld || inputs.updownheld)) {
-			dialog->usingmouse = false;
+			g_MenuUsingMouse = false;
 		}
 		// otherwise rotate left/right by clicking on the side of the menu
-		if (dialog->usingmouse && inputs.select && !inputs.leftright && !inputs.leftrightheld) {
+		if (g_MenuUsingMouse && inputs.select && !inputs.leftright && !inputs.leftrightheld) {
 			if (inputs.mousey > dialog->y && inputs.mousey < dialog->y + dialog->height) {
 				if (inputs.mousex < dialog->x) {
 					inputs.leftright = -1;

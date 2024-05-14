@@ -3745,9 +3745,6 @@ struct menudialog {
 	/*0x6c*/ u8 unk6c;
 	/*0x6d*/ s8 swipedir;
 	/*0x6e*/ u8 unk6e;
-#ifndef PLATFORM_N64
-	/*0x6f*/ u8 usingmouse;
-#endif
 };
 
 struct menudfc {
