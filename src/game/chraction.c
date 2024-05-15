@@ -4389,8 +4389,9 @@ void chrDamage(struct chrdata *chr, f32 damage, struct coord *vector, struct gse
 	}
 
 #ifndef PLATFORM_N64
-	// Don't damage if multiplayer and friendly fire is off
+	// Don't damage if team multiplayer and friendly fire is off
 	if (g_Vars.mplayerisrunning
+			&& (g_MpSetup.options & MPOPTION_TEAMSENABLED)
 			&& !(g_MpSetup.options & MPOPTION_FRIENDLYFIRE)
 			&& aprop
 			&& aprop != vprop
