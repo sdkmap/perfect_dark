@@ -1107,7 +1107,8 @@ void playerSpawn(void)
 
 			if ((g_MpSetup.options & MPOPTION_SPAWNWITHWEAPON)
 					&& g_MpSetup.weapons[0] != MPWEAPON_NONE
-					&& g_MpSetup.weapons[0] != MPWEAPON_DISABLED) {
+					&& g_MpSetup.weapons[0] != MPWEAPON_DISABLED
+					&& g_MpSetup.weapons[0] != MPWEAPON_SHIELD) {
 				struct mpweapon *mpweapon = &g_MpWeapons[g_MpSetup.weapons[0]];
 				invGiveSingleWeapon(mpweapon->weaponnum);
 				bgunEquipWeapon2(HAND_LEFT, WEAPON_NONE);

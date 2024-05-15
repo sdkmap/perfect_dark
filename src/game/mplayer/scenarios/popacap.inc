@@ -61,7 +61,7 @@ struct menuitem g_PacOptionsMenuItems[] = {
 		MENUITEMTYPE_CHECKBOX,
 		0,
 		MENUITEMFLAG_LOCKABLEMINOR | MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"Spawn With Gun",
+		(uintptr_t)"Start Armed",
 		MPOPTION_SPAWNWITHWEAPON,
 		menuhandlerMpCheckboxOption,
 	},
