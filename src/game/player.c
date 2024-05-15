@@ -1111,9 +1111,16 @@ void playerSpawn(void)
 					&& g_MpSetup.weapons[0] != MPWEAPON_SHIELD) {
 				struct mpweapon *mpweapon = &g_MpWeapons[g_MpSetup.weapons[0]];
 				invGiveSingleWeapon(mpweapon->weaponnum);
+				const s32 ammotype = (g_MpSetup.weapons[0] == MPWEAPON_COMBATBOOST) ? AMMOTYPE_BOOST : mpweapon->priammotype;
+				if (ammotype) {
+					s32 startammo = mpweapon->priammoqty / 2;
+					if (startammo == 0) {
+						startammo = 1;
+					}
+					bgunSetAmmoQuantity(ammotype, startammo);
+				}
 				bgunEquipWeapon2(HAND_LEFT, WEAPON_NONE);
 				bgunEquipWeapon2(HAND_RIGHT, mpweapon->weaponnum);
-				bgunSetAmmoQuantity(mpweapon->priammotype, mpweapon->priammoqty / 2);
 			} else
 #endif
 			{
