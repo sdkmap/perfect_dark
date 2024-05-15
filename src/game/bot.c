@@ -264,7 +264,8 @@ void botSpawn(struct chrdata *chr, u8 respawning)
 #ifndef PLATFORM_N64
 		if ((g_MpSetup.options & MPOPTION_SPAWNWITHWEAPON)
 				&& g_MpSetup.weapons[0] != MPWEAPON_NONE
-				&& g_MpSetup.weapons[0] != MPWEAPON_DISABLED) {
+				&& g_MpSetup.weapons[0] != MPWEAPON_DISABLED
+				&& g_MpSetup.weapons[0] != MPWEAPON_SHIELD) {
 			struct mpweapon *mpweapon = &g_MpWeapons[g_MpSetup.weapons[0]];
 			botinvGiveSingleWeapon(chr, mpweapon->weaponnum);
 			botactGiveAmmoByType(aibot, mpweapon->priammotype - 1, mpweapon->priammoqty / 2);
