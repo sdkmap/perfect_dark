@@ -4746,8 +4746,9 @@ void menuProcessInput(void)
 				inputs.select = 1;
 			}
 
-			// don't back out on weapon back when using mouse because it's likely bound to wheel
-			if (!g_MenuMouseControl && (buttonsnow & BUTTON_WPNBACK)) {
+			// HACK: don't back out on weapon back when it's bound to wheel
+			const bool wheel = inputKeyPressed(VK_MOUSE_WHEEL_UP) || inputKeyPressed(VK_MOUSE_WHEEL_DN);
+			if ((buttonsnow & BUTTON_WPNBACK) && !wheel) {
 				inputs.back = 1;
 			}
 #endif
@@ -4781,6 +4782,7 @@ void menuProcessInput(void)
 			if ((sticky < 0 ? -sticky : sticky) < (thissticky < 0 ? -thissticky : thissticky)) {
 				sticky = thissticky;
 			}
+
 #ifndef PLATFORM_N64
 			if ((sticky < 0 ? -sticky : sticky) < (thisrsticky < 0 ? -thisrsticky : thisrsticky)) {
 				sticky = thisrsticky;

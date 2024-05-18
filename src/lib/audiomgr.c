@@ -424,8 +424,7 @@ void *amgrThread(void *arg)
 	f64 nexttick = sysGetMicroseconds();
 	f64 tick;
 
-	while (running)
-	{
+	while (running) {
 		tick = sysGetMicroseconds() + 0.01;
 
 		while (nexttick < tick) {
