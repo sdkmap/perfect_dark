@@ -47,7 +47,7 @@ void frametimeCalculate(void)
 
 #ifndef PLATFORM_N64
 		if (g_TickExtraSleep) {
-			sysSleep(EXTRA_SLEEP_TIME);
+			sysFrameLimiterSleep(EXTRA_SLEEP_TIME);
 		}
 #endif
 	} while (g_Vars.mininc60 && diffframe60 < g_Vars.mininc60);
