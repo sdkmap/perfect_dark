@@ -107,8 +107,8 @@ static const char *ckNames[CK_TOTAL_COUNT] = {
 	"STICK_XPOS",
 	"STICK_YNEG",
 	"STICK_YPOS",
-	"CK_0010",
-	"CK_0020",
+	"ACCEPT_BUTTON",
+	"CANCEL_BUTTON",
 	"CK_0040",
 	"CK_0080",
 	"CK_0100",
@@ -215,6 +215,8 @@ void inputSetDefaultKeyBinds(s32 cidx, s32 n64mode)
 		{ CK_C_U,    SDL_CONTROLLER_BUTTON_DPAD_UP       },
 		{ CK_C_R,    SDL_CONTROLLER_BUTTON_DPAD_RIGHT    },
 		{ CK_C_L,    SDL_CONTROLLER_BUTTON_DPAD_LEFT     },
+		{ CK_ACCEPT, SDL_CONTROLLER_BUTTON_A             },
+		{ CK_CANCEL, SDL_CONTROLLER_BUTTON_B             },
 		{ CK_8000,   SDL_CONTROLLER_BUTTON_LEFTSTICK     },
 	};
 
