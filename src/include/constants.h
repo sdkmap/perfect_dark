@@ -4709,6 +4709,9 @@ enum weaponnum {
 #define BUTTON_ACCEPT BUTTON_ACCEPT_WPNFORWARD
 #define BUTTON_WPNFORWARD BUTTON_ACCEPT_WPNFORWARD
 
+#define BUTTON_UI_ACCEPT BUTTON_ACCEPT_WPNFORWARD
+#define BUTTON_UI_CANCEL BUTTON_CANCEL_USE
+
 #else
 
 // xbla behavior
@@ -4727,6 +4730,9 @@ enum weaponnum {
 #define BUTTON_CROUCH_CYCLE   CONT_8000
 #define BUTTON_HALF_CROUCH    CONT_4000
 #define BUTTON_FULL_CROUCH    CONT_2000
+
+#define BUTTON_UI_ACCEPT      CONT_0010
+#define BUTTON_UI_CANCEL      CONT_0020
 
 #define MOUSEAIM_CLASSIC 0 // crosshair moves around the screen in aim mode
 #define MOUSEAIM_LOCKED 1  // crosshair locked to the center of the screen in aim mode

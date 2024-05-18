@@ -4741,14 +4741,12 @@ void menuProcessInput(void)
 			}
 
 #ifndef PLATFORM_N64
-			// this seems sensible to achieve 1964 parity
-			if (buttonsnow & BUTTON_RADIAL) {
+			// separate buttons for UI accept/cancel
+			if (buttonsnow & BUTTON_UI_ACCEPT) {
 				inputs.select = 1;
 			}
 
-			// HACK: don't back out on weapon back when it's bound to wheel
-			const bool wheel = inputKeyPressed(VK_MOUSE_WHEEL_UP) || inputKeyPressed(VK_MOUSE_WHEEL_DN);
-			if ((buttonsnow & BUTTON_WPNBACK) && !wheel) {
+			if (buttonsnow & BUTTON_UI_CANCEL) {
 				inputs.back = 1;
 			}
 #endif
