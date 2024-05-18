@@ -166,7 +166,7 @@ u32 osAiGetLength(void)
 
 s32 osAiSetNextBuffer(void *bufPtr, u32 size)
 {
-	audioSetNextBuffer(bufPtr, size);
+	audioSubmitBuffer(bufPtr, size);
 	return 0;
 }
 

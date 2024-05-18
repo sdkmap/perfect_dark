@@ -10,6 +10,13 @@
 #include "lib/libc/ll.h"
 #include "data.h"
 #include "types.h"
+#ifndef PLATFORM_N64
+#include "lib/audiomgr.h"
+#include "thread.h"
+#include "audio.h"
+#include "system.h"
+#define AMGR_THREAD_SLEEP_US 2000
+#endif
 
 u32 var80091560;
 u32 var80091564;
@@ -42,6 +49,14 @@ void *g_AudioSp;
 
 u32 var8005cf90 = 0x00000000;
 u8 var8005cf94 = 1;
+
+#ifndef PLATFORM_N64
+systhread g_AmgrThread;
+sysmutex g_AmgrMutex = SYSMUTEX_STATIC_INIT;
+u32 g_AmgrFrame;
+u32 g_AmgrFrameTarget;
+void *amgrThread(void *arg);
+#endif
 
 void amgrHandleDoneMsg(AudioInfo *info);
 void amgrHandleFrameMsg(AudioInfo *info, AudioInfo *previnfo);
@@ -155,6 +170,9 @@ void amgrStartThread(void)
 {
 	osStartThread(&g_AudioManager.thread);
 	g_AudioIsThreadRunning = true;
+#ifndef PLATFORM_N64
+	sysThreadCreate(&g_AmgrThread, &amgrThread, NULL);
+#endif
 }
 
 OSMesgQueue *amgrGetFrameMesgQueue(void)
@@ -171,6 +189,12 @@ void amgrStopThread(void)
 {
 	if (g_AudioIsThreadRunning) {
 		osStopThread(&g_AudioManager.thread);
+#ifndef PLATFORM_N64
+		amgrLock();
+		g_AudioIsThreadRunning = false;
+		amgrUnlock();
+		sysThreadJoin(&g_AmgrThread, NULL);
+#endif
 	}
 }
 
@@ -321,10 +345,13 @@ void amgrHandleDoneMsg(AudioInfo *info)
 }
 
 #ifndef PLATFORM_N64
+
 void amgrFrame(void)
 {
 	static AudioInfo *previnfo = NULL;
 	static s32 count = 0;
+
+	amgrLock();
 
 	var80091588 = osGetTime();
 
@@ -363,6 +390,8 @@ void amgrFrame(void)
 
 	count++;
 
+	amgrUnlock();
+
 	var80091590 = osGetTime();
 	var80091570 = var80091590 - var80091588;
 
@@ -377,4 +406,42 @@ void amgrFrame(void)
 		var80091568 = var80091590 - var80091588;
 	}
 }
+
+void amgrLock(void)
+{
+	sysMutexLock(&g_AmgrMutex);
+}
+
+void amgrUnlock(void)
+{
+	sysMutexUnlock(&g_AmgrMutex);
+}
+
+void *amgrThread(void *arg)
+{
+	const f64 frametime = 1000000.0 / (PAL ? 50.0 : 60.0);
+	bool running = g_AudioIsThreadRunning;
+	f64 nexttick = sysGetMicroseconds();
+	f64 tick;
+
+	while (running)
+	{
+		tick = sysGetMicroseconds() + 0.01;
+
+		while (nexttick < tick) {
+			amgrFrame();
+			g_AmgrFrame++;
+			nexttick += frametime;
+		}
+
+		sysSleep(AMGR_THREAD_SLEEP_US);
+
+		amgrLock();
+		running = g_AudioIsThreadRunning;
+		amgrUnlock();
+	}
+
+	return NULL;
+}
+
 #endif
