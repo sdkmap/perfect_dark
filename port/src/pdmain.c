@@ -502,7 +502,7 @@ void mainLoop(void)
 				schedEndFrame(&g_Sched);
 			}
 			if (g_TickExtraSleep) {
-				sysFrameLimiterSleep(EXTRA_SLEEP_TIME);
+				sysSleep(EXTRA_SLEEP_TIME);
 			}
 		}
 
