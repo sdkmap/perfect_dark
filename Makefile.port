@@ -150,7 +150,7 @@ B_DIR := build/$(ROMID)-port
 G_DIR := src/generated/$(ROMID)
 
 ifneq (,$(findstring windows,$(TARGET_PLATFORM)))
-  TARGET_CFLAGS := $(shell pkg-config sdl2 --cflags-only-I) -pthread
+  TARGET_CFLAGS := $(shell pkg-config sdl2 --cflags-only-I)
   TARGET_LDFLAGS := $(shell pkg-config sdl2 --libs) -lz -lopengl32 -lws2_32 -lwinmm -ldbghelp
   # on windows/mingw we need this to be built with a 32-bit compiler so it finds the correct libs
   TOOLCHAIN ?= i686-w64-mingw32-
@@ -161,7 +161,7 @@ ifneq (,$(findstring windows,$(TARGET_PLATFORM)))
     TARGET_LDFLAGS += -lstdc++
   endif
 else # assume *nix
-  TARGET_CFLAGS := $(shell pkg-config sdl2 --cflags-only-I) -pthread
+  TARGET_CFLAGS := $(shell pkg-config sdl2 --cflags-only-I)
   TARGET_LDFLAGS := $(shell pkg-config sdl2 --libs) -lGL -lz -ldl
   ifneq (,$(findstring arm,$(TARGET_PLATFORM))$(findstring aarch,$(TARGET_PLATFORM)))
     # linux on arm or aarch64

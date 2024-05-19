@@ -40,11 +40,7 @@ void *sysMemZeroAlloc(const u32 size);
 void sysMemFree(void *ptr);
 
 // hns is specified in 100ns units
-// do not use sysFrameLimiterSleep on any thread other than the main one
-void sysFrameLimiterSleep(const s64 hns);
-
-// us is specified in microseconds
-void sysSleep(const s64 us);
+void sysSleep(const s64 hns);
 
 // yield CPU if supported (e.g. during a busy loop)
 void sysCpuRelax(void);

@@ -9,7 +9,6 @@
 #include <strings.h>
 #include <time.h>
 #include <sys/time.h>
-#include <unistd.h>
 #include <SDL.h>
 #include <PR/ultratypes.h>
 #include "platform.h"
@@ -33,6 +32,8 @@ __attribute__((dllexport)) u32 NvOptimusEnablement = 1;
 __attribute__((dllexport)) u32 AmdPowerXpressRequestHighPerformance = 1;
 
 #else
+
+#include <unistd.h>
 
 // figure out how to yield
 #if defined(PLATFORM_X86) || defined(PLATFORM_X86_64)
@@ -304,7 +305,7 @@ void sysMemFree(void *ptr)
 	free(ptr);
 }
 
-void sysFrameLimiterSleep(const s64 hns)
+void sysSleep(const s64 hns)
 {
 #ifdef PLATFORM_WIN32
 	static LARGE_INTEGER li;
@@ -315,12 +316,6 @@ void sysFrameLimiterSleep(const s64 hns)
 	const struct timespec spec = { 0, hns * 100 };
 	nanosleep(&spec, NULL);
 #endif
-}
-
-void sysSleep(const s64 us)
-{
-	const struct timespec spec = { 0, us * 1000 };
-	nanosleep(&spec, NULL);
 }
 
 void sysCpuRelax(void)

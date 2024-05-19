@@ -261,7 +261,7 @@ static inline void sync_framerate_with_timer(void) {
     // We want to exit a bit early, so we can busy-wait the rest to never miss the deadline
     left -= 15000UL;
     if (left > 0) {
-        sysFrameLimiterSleep(left);
+        sysSleep(left);
     }
 
     do {

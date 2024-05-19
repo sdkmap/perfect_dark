@@ -252,6 +252,18 @@ void schedStartFrame(OSSched *sc)
 	}
 }
 
+void schedAudioFrame(OSSched *sc)
+{
+	s32 i;
+
+	if (!g_SndDisabled) {
+		for (i = 0; i < g_Vars.diffframe60; i++) {
+			amgrFrame();
+			audioEndFrame();
+		}
+	}
+}
+
 /**
  * Handle a retrace (vsync) event.
  *
@@ -271,6 +283,18 @@ void schedEndFrame(OSSched *sc)
 	static bool netDebugKey = false;
 
 	sc->frameCount++;
+
+#if PAL
+	if (!g_Resetting && (sc->frameCount & 1)) {
+		// osStopTimer(&g_SchedRspTimer);
+		// osSetTimer(&g_SchedRspTimer, 280000, 0, amgrGetFrameMesgQueue(), &g_SchedRspMsg);
+	}
+#else
+	if (!g_Resetting && ((sc->frameCount & 1) || IS4MB())) {
+		// osStopTimer(&g_SchedRspTimer);
+		// osSetTimer(&g_SchedRspTimer, 280000, 0, amgrGetFrameMesgQueue(), &g_SchedRspMsg);
+	}
+#endif
 
 	if (!g_Resetting) {
 		viHandleRetrace();
@@ -294,6 +318,7 @@ void schedEndFrame(OSSched *sc)
 	}
 
 	sndHandleRetrace();
+	schedAudioFrame(sc);
 	schedRenderCrashPeriodically(sc->frameCount);
 	videoEndFrame();
 
