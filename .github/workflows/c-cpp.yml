@@ -34,6 +34,7 @@ jobs:
       - name: Prepare artifact for packaging
         run: |
            mkdir -p bin/data
+           mkdir -p bin/qmudlls
            cp /mingw64/bin/*.dll bin/qmudlls/
      #     cp build/ntsc-final-port/pd.exe bin/
      #     cp build/pal-final-port/pd.pal.exe bin/
