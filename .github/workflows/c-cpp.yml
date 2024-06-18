@@ -23,26 +23,22 @@ jobs:
             git
             make
             mingw-w64-x86_64-qemu
-            mingw-w64-i686-toolchain
-            mingw-w64-i686-SDL2
-            mingw-w64-i686-zlib
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Build pd.exe
-        run: make -f Makefile.port -j
-      - name: Build pd.pal.exe
-        run: make -f Makefile.port -j ROMID=pal-final
-      - name: Build pd.jpn.exe
-        run: make -f Makefile.port -j ROMID=jpn-final
+     # - name: Build pd.exe
+     #   run: make -f Makefile.port -j
+     # - name: Build pd.pal.exe
+     #   run: make -f Makefile.port -j ROMID=pal-final
+     # - name: Build pd.jpn.exe
+     #   run: make -f Makefile.port -j ROMID=jpn-final
       - name: Prepare artifact for packaging
         run: |
-          mkdir -p bin/data
-          cp build/ntsc-final-port/pd.exe bin/
-          cp build/pal-final-port/pd.pal.exe bin/
-          cp build/jpn-final-port/pd.jpn.exe bin/
-          cp /mingw32/bin/*.dll bin/
-          cp /mingw64/bin/*.dll bin/qmudlls/
-          touch bin/data/put_your_rom_here.txt
+           mkdir -p bin/data
+           cp /mingw64/bin/*.dll bin/qmudlls/
+     #     cp build/ntsc-final-port/pd.exe bin/
+     #     cp build/pal-final-port/pd.pal.exe bin/
+     #     cp build/jpn-final-port/pd.jpn.exe bin/
+     #     touch bin/data/put_your_rom_here.txt
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
